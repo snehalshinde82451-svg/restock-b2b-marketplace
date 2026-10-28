@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReStock — Smart B2B Marketplace for Small Businesses</title>
+  <meta name="description" content="ReStock is a prototype B2B marketplace concept that helps small businesses discover bulk products, compare supplier offers and request quotations.">
+  <style>
+/* ReStock styles: navy / royal blue / white with subtle teal accents */
+:root {
+  --navy: #0b1f4b;
+  --navy-2: #12306e;
+  --royal: #2a5bd7;
+  --royal-dark: #1f47ad;
+  --teal: #0f9d94;
+  --teal-light: #5eead4;
+  --bg: #ffffff;
+  --tint: #f3f6fd;
+  --text: #16223f;
+  --muted: #55627f;
+  --line: #dfe5f3;
+  --danger: #b42318;
+  --ok: #067647;
+  --radius: 16px;
+  --shadow-sm: 0 2px 8px rgba(11, 31, 75, .07);
+  --shadow: 0 10px 30px rgba(11, 31, 75, .10);
+  --font: "Inter", "Segoe UI", system-ui, -apple-system, "Noto Sans", "Noto Sans Devanagari", "Mangal", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body { margin: 0; font-family: var(--font); color: var(--text); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body.modal-open { overflow: hidden; }
+img, svg { max-width: 100%; }
+h1, h2, h3 { color: var(--navy); line-height: 1.2; margin: 0 0 .5em; }
+h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -.01em; }
+h3 { font-size: 1.1rem; }
+p { margin: 0 0 1em; }
+a { color: var(--royal); }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.container { width: min(1180px, 100% - 32px); margin-inline: auto; }
+.container.narrow { width: min(820px, 100% - 32px); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip-link { position: absolute; left: 12px; top: -60px; background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 200; }
+.skip-link:focus { top: 12px; }
+:focus-visible { outline: 3px solid var(--teal-light); outline-offset: 2px; }
+.muted { color: #b9c6e6; }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border-radius: 12px; border: 2px solid transparent; font-weight: 600; text-decoration: none; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background .15s ease; line-height: 1.2; }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn--sm { padding: 8px 14px; border-radius: 10px; font-size: .92rem; }
+.btn--primary { background: var(--royal); color: #fff; box-shadow: 0 4px 12px rgba(42, 91, 215, .28); }
+.btn--primary:hover { background: var(--royal-dark); }
+.btn--dark { background: var(--navy); color: #fff; }
+.btn--dark:hover { background: var(--navy-2); }
+.btn--outline { background: #fff; color: var(--navy); border-color: var(--line); }
+.btn--outline:hover { border-color: var(--royal); color: var(--royal); }
+.btn--ghost { background: transparent; color: var(--navy); border-color: transparent; }
+.btn--ghost:hover { background: var(--tint); }
+.btn--teal { background: var(--teal); color: #fff; }
+.btn--teal:hover { background: #0b857d; }
+.link-btn { background: none; border: 0; color: var(--royal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; }
+
+/* ---------- Header ---------- */
+.site-header { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, .94); backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--line); }
+.header__inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--navy); font-size: 1.35rem; font-weight: 700; }
+.brand__name b { color: var(--royal); font-weight: 800; }
+.brand--light { color: #fff; }
+.brand--light .brand__name b { color: var(--teal-light); }
+.site-nav { display: flex; align-items: center; gap: 14px; flex: 1; justify-content: flex-end; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a { display: block; padding: 8px 10px; border-radius: 10px; color: var(--text); text-decoration: none; font-weight: 500; font-size: .93rem; white-space: nowrap; }
+.nav-links a:hover { background: var(--tint); color: var(--royal); }
+.nav-links a.is-active { color: var(--royal); background: var(--tint); }
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.nav-actions .btn { white-space: nowrap; }
+.lang-select svg { flex: none; }
+.lang-select { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--navy); }
+.lang-select select { border: 0; background: transparent; padding: 8px 2px; font-weight: 500; cursor: pointer; }
+.nav-toggle { display: none; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+.nav-toggle span { display: block; width: 20px; height: 2px; background: var(--navy); border-radius: 2px; transition: transform .2s ease, opacity .2s ease; }
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ---------- Hero ---------- */
+.hero { background: radial-gradient(1000px 500px at 85% -10%, #dbe7ff 0%, transparent 60%), linear-gradient(180deg, #f6f9ff 0%, #fff 100%); padding: clamp(40px, 7vw, 88px) 0; }
+.hero__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center; }
+.pill { display: inline-block; background: #e5f7f5; color: #0a746d; border: 1px solid #b6ebe6; font-size: .82rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+.hero__sub { font-size: 1.15rem; color: var(--muted); max-width: 40em; }
+.hero-search { display: flex; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: var(--shadow); margin: 24px 0 18px; }
+.hero-search__field { flex: 1; min-width: 0; }
+.hero-search__field--select { flex: 0 0 210px; border-left: 1px solid var(--line); }
+.hero-search input, .hero-search select { width: 100%; border: 0; background: transparent; padding: 12px; border-radius: 10px; }
+.hero-search input:focus, .hero-search select:focus { outline: 2px solid var(--royal); }
+.hero__cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.trust-note { display: flex; gap: 8px; align-items: flex-start; color: var(--muted); font-size: .92rem; max-width: 38em; }
+.trust-note svg { color: var(--teal); flex: none; margin-top: 3px; }
+
+.collage { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 22px; background: linear-gradient(145deg, var(--navy) 0%, var(--navy-2) 100%); border-radius: 28px; box-shadow: var(--shadow); }
+.collage__tile { aspect-ratio: 1; display: grid; place-items: center; font-size: clamp(2rem, 5vw, 3.2rem); background: rgba(255, 255, 255, .95); border-radius: 20px; animation: floaty 6s ease-in-out infinite; }
+.collage__tile.t2, .collage__tile.t5 { animation-delay: -2s; background: #dbe7ff; }
+.collage__tile.t3, .collage__tile.t6 { animation-delay: -4s; background: #d9f3f1; }
+.chip { position: absolute; background: #fff; color: var(--navy); font-weight: 600; font-size: .85rem; padding: 8px 14px; border-radius: 999px; box-shadow: var(--shadow); display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.chip span:first-child { color: var(--teal); font-weight: 800; }
+.chip--a { top: -14px; left: 18px; }
+.chip--b { right: -10px; top: 42%; }
+.chip--c { bottom: -14px; left: 28%; }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* ---------- Sections ---------- */
+.section { padding: clamp(48px, 7vw, 84px) 0; }
+.section--tint { background: var(--tint); }
+.section--navy { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; }
+.section__head { max-width: 760px; margin-bottom: 32px; }
+.section__head p { color: var(--muted); }
+.section__head--light h2 { color: #fff; }
+.section__head--light p { color: #c9d6f5; }
+.demo-label { display: inline-block; font-size: .85rem; font-weight: 600; color: #8a5a00; background: #fff4d6; border: 1px solid #f3dca0; padding: 4px 10px; border-radius: 8px; }
+
+/* ---------- Categories ---------- */
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.cat-card { display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.cat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--royal); }
+.cat-card__icon { width: 52px; height: 52px; display: grid; place-items: center; font-size: 1.6rem; border-radius: 14px; margin-bottom: 6px; }
+.cat-card__name { font-weight: 700; color: var(--navy); }
+.cat-card__count { font-size: .88rem; color: var(--muted); }
+
+/* ---------- Filters and products ---------- */
+.filters { display: grid; grid-template-columns: 2fr 1.3fr 1.3fr auto; gap: 14px; align-items: end; background: #fff; padding: 16px; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { font-weight: 600; font-size: .9rem; color: var(--navy); }
+.field input, .field select, .field textarea { color: var(--text); width: 100%; padding: 11px 12px; border: 1.5px solid #c9d3ea; border-radius: 10px; background: #fff; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--royal); box-shadow: 0 0 0 3px rgba(42, 91, 215, .18); }
+.field [aria-invalid="true"] { border-color: var(--danger); }
+.field-error { color: var(--danger); font-size: .85rem; min-height: 0; margin: 0; }
+.field-error:empty { display: none; }
+.field-error--light { color: #ffb4a8; margin-top: 10px; }
+.filter-status { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 16px 0; align-items: center; }
+.results-count { margin: 0; color: var(--muted); font-weight: 500; }
+.supplier-bar { margin: 0; background: #e5edff; color: var(--navy); padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: .9rem; }
+.supplier-bar button { margin-left: 8px; }
+
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.product { display: flex; flex-direction: column; overflow: hidden; transition: transform .18s ease, box-shadow .18s ease; animation: rise .35s ease both; }
+.product:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.product__art { position: relative; height: 150px; display: grid; place-items: center; font-size: 3.6rem; }
+.tag { position: absolute; left: 10px; top: 10px; font-style: normal; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .9); color: var(--navy); }
+.tag--teal { background: #d9f3f1; color: #0a746d; }
+.wish { position: absolute; right: 10px; top: 10px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); color: #9aa6c4; font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform .15s ease, color .15s ease; }
+.wish:hover { transform: scale(1.1); }
+.wish.is-on { color: #e0245e; }
+.product__body { display: flex; flex-direction: column; gap: 4px; padding: 16px; flex: 1; }
+.product__cat { margin: 0; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--teal); }
+.product__body h3 { margin: 0; font-size: 1.02rem; }
+.product__supplier { margin: 0; font-size: .85rem; color: var(--muted); }
+.product__desc { margin: 4px 0 8px; font-size: .9rem; color: var(--muted); flex: 1; }
+.product__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.price { font-size: 1.25rem; color: var(--navy); }
+.price small { font-size: .8rem; font-weight: 500; color: var(--muted); }
+.moq { font-size: .82rem; font-weight: 600; background: var(--tint); color: var(--navy); padding: 3px 10px; border-radius: 999px; }
+.product__actions { display: flex; gap: 8px; }
+.product__actions .btn { flex: 1; padding-inline: 10px; }
+
+.reasons { margin: 0 0 12px; padding: 10px 12px; background: #eefaf8; border: 1px solid #c7eeea; border-radius: 10px; font-size: .84rem; color: #0b4f4a; }
+.reasons strong { display: block; margin-bottom: 4px; }
+.reasons li { padding-left: 18px; position: relative; }
+.reasons li::before { content: "✓"; position: absolute; left: 0; color: var(--teal); font-weight: 800; }
+.reasons--warn { background: #fff7e8; border-color: #f3dca0; color: #7a4b00; }
+.reasons--warn li::before { content: "!"; color: #b26a00; }
+
+.skeleton { height: 340px; border-radius: var(--radius); background: linear-gradient(90deg, #eaeffa 25%, #f5f8ff 37%, #eaeffa 63%); background-size: 400% 100%; animation: shimmer 1.3s ease infinite; }
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.empty { text-align: center; padding: 48px 16px; background: #fff; border: 1px dashed #b9c6e6; border-radius: var(--radius); }
+.empty__icon { font-size: 2.4rem; }
+.empty p { color: var(--muted); }
+
+/* ---------- Suppliers ---------- */
+.supplier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 20px; }
+.supplier { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.supplier__avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--tint); color: var(--royal); display: grid; place-items: center; font-weight: 800; font-size: 1.2rem; }
+.supplier h3 { margin: 0; }
+.supplier__loc { margin: 0; color: var(--muted); font-size: .9rem; }
+.supplier__cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.supplier__cats span { font-size: .75rem; font-weight: 600; background: var(--tint); color: var(--navy); padding: 3px 9px; border-radius: 999px; }
+.supplier__desc { flex: 1; font-size: .92rem; color: var(--muted); margin: 0; }
+.supplier__demo { margin: 0; font-size: .78rem; color: #8a5a00; font-weight: 600; }
+.supplier__count { margin: 0; font-size: .85rem; color: var(--muted); }
+
+/* ---------- Smart Match ---------- */
+.match-form { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 14px; align-items: end; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18); border-radius: var(--radius); padding: 18px; }
+.match-form label { color: #e5ecff; }
+.match-results { margin-top: 28px; }
+.match-results > h3 { color: #fff; margin-bottom: 14px; }
+.match-results .match-note h3 { color: #fff; }
+.match-results .product-grid { margin-bottom: 20px; }
+.match-note { background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius); padding: 24px; text-align: center; }
+.match-note p { color: #d6e1fb; max-width: 40em; margin-inline: auto; }
+.match-loading { color: #d6e1fb; font-weight: 600; }
+.spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, .3); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -3px; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Forms ---------- */
+.form-card { padding: clamp(18px, 3vw, 32px); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.span-2 { grid-column: 1 / -1; }
+.form-success { margin-top: 16px; padding: 12px 16px; background: #e8f8ef; border: 1px solid #b4e5c8; color: var(--ok); border-radius: 12px; font-weight: 600; }
+.hint { font-size: .85rem; color: var(--muted); }
+
+/* ---------- Dashboard ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat { padding: 20px; }
+.stat__value { display: block; font-size: 2.2rem; font-weight: 800; color: var(--royal); line-height: 1.1; }
+.stat__label { color: var(--muted); font-weight: 500; font-size: .92rem; }
+.dash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.dash-card { padding: 20px; }
+.dash-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .93rem; }
+.dash-list li:last-child { border-bottom: 0; }
+.dash-list time { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.dash-empty { color: var(--muted); font-size: .92rem; }
+.dash-actions { margin-top: 16px; }
+
+/* ---------- How it works / About ---------- */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: s; }
+.step { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); }
+.step__num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--royal); color: #fff; font-weight: 800; margin-bottom: 12px; }
+.step p { color: var(--muted); margin: 0; }
+.for-sellers { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; margin-top: 28px; padding: clamp(20px, 3vw, 32px); background: linear-gradient(135deg, var(--navy), var(--navy-2)); color: #fff; border-radius: 22px; }
+.for-sellers h3 { color: #fff; font-size: 1.4rem; }
+.for-sellers p { color: #c9d6f5; }
+.check-list li { position: relative; padding: 8px 0 8px 32px; }
+.check-list li::before { content: "✓"; position: absolute; left: 0; top: 8px; width: 22px; height: 22px; display: grid; place-items: center; background: var(--teal); color: #fff; border-radius: 50%; font-size: .8rem; font-weight: 800; }
+.lead { font-size: 1.15rem; color: var(--navy); }
+.value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.value { padding: 20px; }
+.value span { font-size: 1.6rem; }
+.value p { color: var(--muted); margin: 0; font-size: .93rem; }
+.legal p { color: var(--muted); }
+
+/* ---------- Footer ---------- */
+.site-footer { background: var(--navy); color: #c9d6f5; padding-top: 56px; }
+.footer__grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1.3fr; gap: 28px; }
+.footer__grid h3 { color: #fff; font-size: .95rem; text-transform: uppercase; letter-spacing: .06em; }
+.footer__grid li { margin-bottom: 8px; }
+.footer__grid a { color: #c9d6f5; text-decoration: none; }
+.footer__grid a:hover { color: #fff; text-decoration: underline; }
+.footer__brand p { margin-top: 12px; font-size: .92rem; }
+.lang-select--footer { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .25); color: #fff; margin-top: 12px; }
+.lang-select--footer option { color: #16223f; }
+.footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: 36px; padding: 20px 0 28px; border-top: 1px solid rgba(255, 255, 255, .15); font-size: .85rem; }
+.footer__bottom p { margin: 0; }
+.footer__note { color: #98a9d3; max-width: 52em; }
+
+/* ---------- Modals, toast, back-to-top ---------- */
+.modal { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 16px; }
+.modal[hidden] { display: none; }
+.modal__backdrop { position: absolute; inset: 0; background: rgba(11, 31, 75, .55); backdrop-filter: blur(2px); }
+.modal__dialog { position: relative; width: min(640px, 100%); max-height: 92vh; overflow-y: auto; background: #fff; border-radius: 22px; padding: clamp(20px, 3vw, 32px); box-shadow: 0 30px 80px rgba(0, 0, 0, .35); animation: rise .25s ease both; }
+.modal__dialog--sm { width: min(460px, 100%); }
+.modal__close { position: absolute; right: 14px; top: 12px; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--tint); color: var(--navy); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.modal__dialog form .field { margin-bottom: 14px; }
+.modal__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.detail__art { height: 170px; display: grid; place-items: center; font-size: 4.4rem; border-radius: 16px; margin-bottom: 16px; }
+.detail__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 16px 0; }
+.detail__grid dt { font-size: .8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.detail__grid dd { margin: 0 0 4px; font-weight: 600; color: var(--navy); }
+.quote-success { text-align: center; padding: 16px 0; }
+.success-icon { width: 64px; height: 64px; margin: 0 auto 12px; display: grid; place-items: center; border-radius: 50%; background: #e8f8ef; color: var(--ok); font-size: 2rem; font-weight: 800; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--navy); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; z-index: 400; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.error { background: var(--danger); }
+.back-top { position: fixed; right: 18px; bottom: 18px; width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--royal); color: #fff; font-size: 1.3rem; cursor: pointer; box-shadow: var(--shadow); z-index: 90; }
+.back-top[hidden] { display: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer__grid { grid-template-columns: repeat(3, 1fr); }
+  .footer__brand { grid-column: 1 / -1; }
+}
+@media (max-width: 1100px) {
+  .nav-toggle { display: inline-flex; }
+  .site-nav { position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; background: #fff; border-bottom: 1px solid var(--line); box-shadow: var(--shadow); display: none; max-height: calc(100vh - 68px); overflow-y: auto; }
+  .site-nav.open { display: flex; }
+  .nav-links { flex-direction: column; }
+  .nav-links a { padding: 12px; }
+  .nav-actions { flex-wrap: wrap; }
+  .nav-actions .btn { flex: 1; }
+}
+@media (max-width: 960px) {
+  .hero__grid { grid-template-columns: 1fr; }
+  .hero__art { max-width: 420px; margin: 8px auto 0; }
+  .filters { grid-template-columns: 1fr 1fr; }
+  .filters .btn { grid-column: 1 / -1; }
+  .match-form { grid-template-columns: 1fr 1fr; }
+  .match-form .btn { grid-column: 1 / -1; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps, .value-grid { grid-template-columns: 1fr; }
+  .for-sellers, .dash-cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cat-card { padding: 14px; }
+  .hero-search { flex-direction: column; }
+  .hero-search__field--select { flex: 1; border-left: 0; border-top: 1px solid var(--line); }
+  .filters, .match-form, .form-grid { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+  .detail__grid { grid-template-columns: 1fr; }
+  .chip--b { right: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== B2B layer + motion ===== */
+#progress{position:fixed;top:0;left:0;height:3px;width:100%;background:linear-gradient(90deg,var(--royal),var(--teal-light));transform:scaleX(0);transform-origin:0 50%;z-index:300}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s cubic-bezier(.2,.7,.2,1) var(--d,0s),transform .6s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+.hero{background-size:140% 140%,100% 100%;animation:hue 14s ease-in-out infinite alternate}
+@keyframes hue{to{background-position:30% 60%,0 0}}
+@keyframes bob{50%{translate:0 -10px}}
+.collage__tile,.chip{animation:bob 5s ease-in-out infinite}
+.collage__tile:nth-child(2n),.chip:nth-child(2n){animation-delay:-1.8s}.collage__tile:nth-child(3n){animation-delay:-3.2s}
+.card.product,.supplier,.cat-card,.step,.value{transition:transform .25s ease,box-shadow .25s ease}
+.card.product:hover,.supplier:hover,.cat-card:hover,.value:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(11,31,75,.16)}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}
+.btn:hover::after{transform:translateX(120%)}
+.modal:not([hidden]) .modal__dialog{animation:pop .28s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}}
+.bulk-line{margin:-4px 0 10px;font-size:.85rem;font-weight:600;color:var(--teal)}
+.tier-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem}
+.tier-table th,.tier-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.tier-table tr:nth-child(2) td{background:var(--tint)}
+#bulkFab{position:fixed;left:18px;bottom:18px;z-index:90;box-shadow:var(--shadow)}
+#bulkFab[hidden]{display:none}
+#bulkFab b{background:#fff;color:var(--navy);border-radius:99px;padding:0 8px;margin-left:6px}
+.bulk-row{display:grid;grid-template-columns:1fr 90px 90px 28px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.bulk-row input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+.bulk-row small{color:var(--muted);display:block}
+.bulk-total{display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;margin:14px 0}
+.tabs{display:flex;gap:6px;margin-bottom:14px}.tabs button{flex:1}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--tint);color:var(--royal);border:1px solid var(--line)}
+.p-cta{padding:28px;text-align:center}
+.p-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.p-h3{margin:26px 0 10px}
+.tbl{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.tbl table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+.tbl th{background:var(--tint);text-align:left;padding:10px 12px;color:var(--navy)}.tbl td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.acts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mini{width:92px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}.mini.wide{width:130px}
+.st{font-weight:700;font-size:.78rem;padding:3px 10px;border-radius:99px;background:#eef2fb;color:var(--navy)}
+.st-quoted,.st-confirmed,.st-shipped{background:#dbe7ff;color:var(--royal-dark)}.st-accepted,.st-delivered{background:#d5f5e3;color:var(--ok)}.st-rejected,.st-cancelled{background:#fde4e1;color:var(--danger)}
+#dashboard .stat-grid,#dashboard .dash-cols,#dashboard .dash-actions,#dashboard .demo-label{display:none}
+@media(max-width:560px){.bulk-row{grid-template-columns:1fr 80px 28px}.bulk-row .lt{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="app.js"></script>
+
+
+
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to main content</a>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="#home" aria-label="ReStock">
+        <svg class="brand__icon" viewBox="0 0 32 32" width="34" height="34" aria-hidden="true">
+          <rect width="32" height="32" rx="9" fill="#2A5BD7"/>
+          <path d="M8 12.5 16 8.5l8 4v8.5l-8 4-8-4z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M16 22v-8.5m-3.5 3.5 3.5-3.5 3.5 3.5" fill="none" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand__name">Re<b>Stock</b></span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle menu" data-i18n-aria="menu_toggle">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="site-nav" id="siteNav" aria-label="Primary">
+        <ul class="nav-links">
+          <li><a href="#home" data-i18n="nav_home">Home</a></li>
+          <li><a href="#products" data-i18n="nav_explore">Explore Products</a></li>
+          <li><a href="#categories" data-i18n="nav_categories">Categories</a></li>
+          <li><a href="#suppliers" data-i18n="nav_suppliers">Find Suppliers</a></li>
+          <li><a href="#how-it-works" data-i18n="nav_how">How It Works</a></li>
+          <li><a href="#about" data-i18n="nav_about">About Us</a></li>
+          <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+          <label class="lang-select">
+            <span class="sr-only" data-i18n="lang_label">Language</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            <select id="langSelect" class="js-lang">
+              <option value="en">English</option>
+              <option value="mr">मराठी</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </label>
+          <button class="btn btn--ghost btn--sm" type="button" id="loginBtn" data-i18n="btn_login">Login</button>
+          <button class="btn btn--primary btn--sm" type="button" id="joinBtn" data-i18n="btn_join">Join Free</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="home" aria-labelledby="heroTitle">
+      <div class="container hero__grid">
+        <div class="hero__copy">
+          <span class="pill" data-i18n="hero_badge">Prototype • Sample data</span>
+          <h1 id="heroTitle" data-i18n="hero_title">Your Business. Better Suppliers. Smarter Buying.</h1>
+          <p class="hero__sub" data-i18n="hero_sub">Discover bulk products, compare supplier offers, and request quotations — all in one place.</p>
+
+          <form class="hero-search" id="heroSearch" role="search">
+            <div class="hero-search__field">
+              <label class="sr-only" for="heroQuery" data-i18n="hero_search_label">Search products</label>
+              <input id="heroQuery" type="search" autocomplete="off" placeholder="Search products, e.g. paper bags" data-i18n-ph="hero_search_ph">
+            </div>
+            <div class="hero-search__field hero-search__field--select">
+              <label class="sr-only" for="heroCategory" data-i18n="hero_category_label">Category</label>
+              <select id="heroCategory"></select>
+            </div>
+            <button class="btn btn--primary" type="submit" data-i18n="btn_search">Search</button>
+          </form>
+
+          <div class="hero__cta">
+            <a class="btn btn--dark" href="#products" data-i18n="btn_explore">Explore Products</a>
+            <a class="btn btn--outline" href="#sell" data-i18n="btn_become_supplier">Become a Supplier</a>
+          </div>
+
+          <p class="trust-note">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.2 7.8 8 9 4.8-1.2 8-4.5 8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span data-i18n="hero_trust">Transparent by design: sample data is clearly labeled, with no fake badges, reviews or payments.</span>
+          </p>
+        </div>
+
+        <div class="hero__art" aria-hidden="true">
+          <div class="collage">
+            <div class="collage__tile t1">📦</div>
+            <div class="collage__tile t2">🔌</div>
+            <div class="collage__tile t3">👕</div>
+            <div class="collage__tile t4">🌱</div>
+            <div class="collage__tile t5">🍚</div>
+            <div class="collage__tile t6">🖊️</div>
+            <div class="chip chip--a"><span>⇅</span> <span data-i18n="chip_compare">Compare prices</span></div>
+            <div class="chip chip--b"><span>✓</span> <span data-i18n="chip_moq">Check MOQ</span></div>
+            <div class="chip chip--c"><span>✉</span> <span data-i18n="btn_quote">Request Quote</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CATEGORIES ============ -->
+    <section class="section" id="categories" aria-labelledby="catTitle">
+      <div class="container">
+        <header class="section__head">
+          <h2 id="catTitle" data-i18n="cat_title">Browse by Category</h2>
+          <p data-i18n="cat_sub">Pick a category to filter the product listings.</p>
+        </header>
+        <div class="cat-grid" id="categoryGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ EXPLORE PRODUCTS ============ -->
+    <section class="section section--tint" id="products" aria-labelledby="prodTitle">
+      <div class="container">
+        <header class="section__head">
+          <h2 id="prodTitle" data-i18n="products_title">Explore Products</h2>
+          <p data-i18n="products_sub">Sample listings with prices per unit and minimum order quantities.</p>
+          <p class="demo-label" data-i18n="sample_data_note">All products and suppliers are fictional sample data.</p>
+        </header>
+
+        <form class="filters" id="filters" onsubmit="return false">
+          <div class="field">
+            <label for="filterQuery" data-i18n="filter_search_label">Search by product name</label>
+            <input id="filterQuery" type="search" autocomplete="off" placeholder="Search by name" data-i18n-ph="filter_search_ph">
+          </div>
+          <div class="field">
+            <label for="filterCategory" data-i18n="filter_category">Category</label>
+            <select id="filterCategory"></select>
+          </div>
+          <div class="field">
+            <label for="filterSort" data-i18n="sort_label">Sort by price</label>
+            <select id="filterSort">
+              <option value="default" data-i18n="sort_default">Featured</option>
+              <option value="low" data-i18n="sort_low">Price: Low to High</option>
+              <option value="high" data-i18n="sort_high">Price: High to Low</option>
+            </select>
+          </div>
+          <button class="btn btn--outline" type="button" id="clearFilters" data-i18n="btn_clear">Clear filters</button>
+        </form>
+
+        <div class="filter-status">
+          <p id="resultsCount" class="results-count" role="status" aria-live="polite"></p>
+          <p id="supplierBar" class="supplier-bar" hidden></p>
+        </div>
+
+        <div class="product-grid" id="productGrid" aria-busy="true"></div>
+        <div class="empty" id="productsEmpty" hidden>
+          <div class="empty__icon" aria-hidden="true">🔍</div>
+          <h3 data-i18n="empty_products_title">No products found</h3>
+          <p data-i18n="empty_products_text">Try a different search or clear the filters.</p>
+          <button class="btn btn--primary btn--sm" type="button" id="emptyClear" data-i18n="btn_clear">Clear filters</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SUPPLIERS ============ -->
+    <section class="section" id="suppliers" aria-labelledby="supTitle">
+      <div class="container">
+        <header class="section__head">
+          <h2 id="supTitle" data-i18n="suppliers_title">Find Suppliers</h2>
+          <p data-i18n="suppliers_sub">Browse the supplier directory and view their listed products.</p>
+          <p class="demo-label" data-i18n="sample_data_note">All products and suppliers are fictional sample data.</p>
+        </header>
+        <div class="supplier-grid" id="supplierGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ SMART MATCH ============ -->
+    <section class="section section--navy" id="smart-match" aria-labelledby="matchTitle">
+      <div class="container">
+        <header class="section__head section__head--light">
+          <h2 id="matchTitle" data-i18n="match_title">Find the Right Products for Your Business</h2>
+          <p data-i18n="match_sub">Smart Match uses simple, transparent rules (category, budget, MOQ and stock). It does not use an AI model.</p>
+        </header>
+
+        <form class="match-form" id="matchForm" novalidate>
+          <div class="field">
+            <label for="matchCategory" data-i18n="match_category">Product category</label>
+            <select id="matchCategory"></select>
+          </div>
+          <div class="field">
+            <label for="matchBudget" data-i18n="match_budget">Maximum budget per unit (₹)</label>
+            <input id="matchBudget" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 100">
+          </div>
+          <div class="field">
+            <label for="matchQty" data-i18n="match_qty">Required quantity</label>
+            <input id="matchQty" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 200">
+          </div>
+          <button class="btn btn--teal" type="submit" id="matchBtn" data-i18n="match_btn">Find My Match</button>
+        </form>
+        <p class="field-error field-error--light" id="matchError" role="alert"></p>
+
+        <div id="matchResults" class="match-results" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ============ SELLER FORM ============ -->
+    <section class="section" id="sell" aria-labelledby="sellTitle">
+      <div class="container narrow">
+        <header class="section__head">
+          <h2 id="sellTitle" data-i18n="sell_title">Sell on ReStock: Add a Product</h2>
+          <p data-i18n="sell_sub">List a product in this demo. It appears in the marketplace immediately and is saved in this browser only.</p>
+        </header>
+
+        <form class="card form-card" id="sellForm" novalidate>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="pName" data-i18n="f_name">Product name</label>
+              <input id="pName" type="text" maxlength="80" autocomplete="off">
+              <p class="field-error" id="pNameErr"></p>
+            </div>
+            <div class="field">
+              <label for="pCategory" data-i18n="f_category">Category</label>
+              <select id="pCategory"></select>
+              <p class="field-error" id="pCategoryErr"></p>
+            </div>
+            <div class="field">
+              <label for="pSupplier" data-i18n="f_supplier">Supplier / business name</label>
+              <input id="pSupplier" type="text" maxlength="60" autocomplete="off">
+              <p class="field-error" id="pSupplierErr"></p>
+            </div>
+            <div class="field">
+              <label for="pPrice" data-i18n="f_price">Price per unit (₹)</label>
+              <input id="pPrice" type="number" min="0" step="any" inputmode="decimal">
+              <p class="field-error" id="pPriceErr"></p>
+            </div>
+            <div class="field">
+              <label for="pAvailable" data-i18n="f_available">Available quantity</label>
+              <input id="pAvailable" type="number" min="1" step="1" inputmode="numeric">
+              <p class="field-error" id="pAvailableErr"></p>
+            </div>
+            <div class="field span-2">
+              <label for="pMoq" data-i18n="f_moq">Minimum order quantity (MOQ)</label>
+              <input id="pMoq" type="number" min="1" step="1" inputmode="numeric">
+              <p class="field-error" id="pMoqErr"></p>
+            </div>
+            <div class="field span-2">
+              <label for="pDesc" data-i18n="f_desc">Short description</label>
+              <textarea id="pDesc" rows="3" maxlength="200"></textarea>
+              <p class="field-error" id="pDescErr"></p>
+            </div>
+          </div>
+          <p class="field-error" id="sellFormErr" role="alert"></p>
+          <button class="btn btn--primary" type="submit" data-i18n="btn_add_product">Add Product</button>
+          <div class="form-success" id="sellSuccess" role="status" hidden>
+            <span id="sellSuccessText"></span>
+            <button class="link-btn" type="button" id="viewInMarket" data-i18n="view_in_marketplace">View in marketplace</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="section section--tint" id="dashboard" aria-labelledby="dashTitle">
+      <div class="container">
+        <header class="section__head">
+          <h2 id="dashTitle" data-i18n="dash_title">Local Demo Dashboard</h2>
+          <p data-i18n="dash_sub">Real counts calculated from this browser's prototype data. Not a shared database.</p>
+          <p class="demo-label" id="storageNote"></p>
+        </header>
+
+        <div id="b2bPanel"></div>
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div class="dash-cols">
+          <div class="card dash-card">
+            <h3 data-i18n="d_quotes_list">Recent quotation requests</h3>
+            <div id="quoteList"></div>
+          </div>
+          <div class="card dash-card">
+            <h3 data-i18n="d_recent">Recent activity</h3>
+            <div id="activityList"></div>
+          </div>
+        </div>
+        <div class="dash-actions">
+          <button class="btn btn--outline btn--sm" type="button" id="resetData" data-i18n="d_clear">Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section" id="how-it-works" aria-labelledby="howTitle">
+      <div class="container">
+        <header class="section__head">
+          <h2 id="howTitle" data-i18n="how_title">How It Works</h2>
+        </header>
+        <ol class="steps">
+          <li class="step"><span class="step__num">1</span><h3 data-i18n="how_s1_t">Search for products</h3><p data-i18n="how_s1_d">Search by name or browse categories to find what your business needs.</p></li>
+          <li class="step"><span class="step__num">2</span><h3 data-i18n="how_s2_t">Compare offers and find a supplier</h3><p data-i18n="how_s2_d">Compare unit prices and MOQs, or use Smart Match to shortlist products.</p></li>
+          <li class="step"><span class="step__num">3</span><h3 data-i18n="how_s3_t">Request a quotation</h3><p data-i18n="how_s3_d">Send a quote request to connect with the supplier. In this demo, requests are saved locally.</p></li>
+        </ol>
+
+        <div class="for-sellers" id="for-sellers">
+          <div>
+            <h3 data-i18n="sellers_title">For Sellers</h3>
+            <p data-i18n="sellers_sub">List your products so small businesses can find them.</p>
+            <a class="btn btn--teal" href="#sell" data-i18n="sellers_cta">Add a product</a>
+          </div>
+          <ul class="check-list">
+            <li data-i18n="sellers_s1">Add your product with price, stock and MOQ.</li>
+            <li data-i18n="sellers_s2">It appears in the marketplace and in Smart Match.</li>
+            <li data-i18n="sellers_s3">Buyers send quote requests for your product.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="section section--tint" id="about" aria-labelledby="aboutTitle">
+      <div class="container narrow">
+        <header class="section__head">
+          <h2 id="aboutTitle" data-i18n="about_title">About ReStock</h2>
+        </header>
+        <p class="lead" data-i18n="about_p1">ReStock is a prototype concept designed to make bulk sourcing easier for small businesses.</p>
+        <p data-i18n="about_p2">It focuses on convenience, easy price comparison and simpler supplier discovery. It is a hackathon demo, not a live business.</p>
+        <div class="value-grid">
+          <div class="card value"><span aria-hidden="true">🧭</span><h3 data-i18n="about_v1_t">Convenience</h3><p data-i18n="about_v1_d">One place to search, shortlist and ask for quotes.</p></div>
+          <div class="card value"><span aria-hidden="true">⚖️</span><h3 data-i18n="about_v2_t">Price comparison</h3><p data-i18n="about_v2_d">See unit prices and MOQs side by side.</p></div>
+          <div class="card value"><span aria-hidden="true">🤝</span><h3 data-i18n="about_v3_t">Supplier discovery</h3><p data-i18n="about_v3_d">Find suppliers by category and location.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="section" id="contact" aria-labelledby="contactTitle">
+      <div class="container narrow">
+        <header class="section__head">
+          <h2 id="contactTitle" data-i18n="contact_title">Contact Us</h2>
+          <p data-i18n="contact_sub">Demo form: messages are not sent to a real company.</p>
+        </header>
+        <form class="card form-card" id="contactForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="cName" data-i18n="c_name">Name</label>
+              <input id="cName" type="text" maxlength="80" autocomplete="off">
+              <p class="field-error" id="cNameErr"></p>
+            </div>
+            <div class="field">
+              <label for="cEmail" data-i18n="c_email">Email</label>
+              <input id="cEmail" type="email" maxlength="120" autocomplete="off">
+              <p class="field-error" id="cEmailErr"></p>
+            </div>
+            <div class="field span-2">
+              <label for="cSubject" data-i18n="c_subject">Subject</label>
+              <input id="cSubject" type="text" maxlength="100" autocomplete="off">
+              <p class="field-error" id="cSubjectErr"></p>
+            </div>
+            <div class="field span-2">
+              <label for="cMessage" data-i18n="c_message">Message</label>
+              <textarea id="cMessage" rows="4" maxlength="500"></textarea>
+              <p class="field-error" id="cMessageErr"></p>
+            </div>
+          </div>
+          <button class="btn btn--primary" type="submit" data-i18n="btn_send_msg">Send Message</button>
+          <div class="form-success" id="contactSuccess" role="status" hidden data-i18n="contact_ok">Thanks! This is a demo, so your message was not sent anywhere.</div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ DEMO POLICIES ============ -->
+    <section class="section section--tint legal" id="privacy" aria-labelledby="privacyTitle">
+      <div class="container narrow">
+        <h2 id="privacyTitle" data-i18n="privacy_title">Privacy Policy (Demo Example)</h2>
+        <p class="demo-label" data-i18n="legal_note">This is an example page for a prototype, not legal advice. Policy text is shown in English only.</p>
+        <p>ReStock is a hackathon prototype. It uses Supabase for sign-in and data storage when configured (otherwise a local demo mode), and has no payments.</p>
+        <p>Accounts, product listings, quote requests and bulk orders are stored in the project’s Supabase database and are visible only to the parties involved (buyer and supplier). In local demo mode they stay in your browser.</p>
+        <p>Please use sample information only. You can delete everything at any time with the “Reset demo data” button on the dashboard, or by clearing your browser's site data.</p>
+      </div>
+    </section>
+
+    <section class="section legal" id="terms" aria-labelledby="termsTitle">
+      <div class="container narrow">
+        <h2 id="termsTitle" data-i18n="terms_title">Terms of Use (Demo Example)</h2>
+        <p class="demo-label" data-i18n="legal_note">This is an example page for a prototype, not legal advice. Policy text is shown in English only.</p>
+        <p>All products, prices, suppliers and locations on ReStock are fictional sample data and do not represent real offers. No supplier on this site has been verified.</p>
+        <p>Quotes and bulk orders are recorded between accounts for demonstration; no payments or binding contracts are made through this prototype.</p>
+        <p>The prototype is provided as-is for demonstration and learning purposes.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <a class="brand brand--light" href="#home" aria-label="ReStock">
+          <svg class="brand__icon" viewBox="0 0 32 32" width="34" height="34" aria-hidden="true">
+            <rect width="32" height="32" rx="9" fill="#2A5BD7"/>
+            <path d="M8 12.5 16 8.5l8 4v8.5l-8 4-8-4z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M16 22v-8.5m-3.5 3.5 3.5-3.5 3.5 3.5" fill="none" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="brand__name">Re<b>Stock</b></span>
+        </a>
+        <p data-i18n="footer_desc">ReStock is a prototype B2B marketplace concept for small businesses. Sample data only.</p>
+      </div>
+
+      <div>
+        <h3 data-i18n="foot_marketplace">Marketplace</h3>
+        <ul>
+          <li><a href="#products" data-i18n="nav_explore">Explore Products</a></li>
+          <li><a href="#categories" data-i18n="nav_categories">Categories</a></li>
+          <li><a href="#smart-match" data-i18n="foot_smart">Smart Match</a></li>
+          <li><a href="#dashboard" data-i18n="foot_dashboard">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 data-i18n="foot_suppliers">Suppliers</h3>
+        <ul>
+          <li><a href="#suppliers" data-i18n="nav_suppliers">Find Suppliers</a></li>
+          <li><a href="#sell" data-i18n="foot_add_product">Add a Product</a></li>
+          <li><a href="#for-sellers" data-i18n="foot_for_sellers">For Sellers</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 data-i18n="foot_help">Help & Support</h3>
+        <ul>
+          <li><a href="#how-it-works" data-i18n="nav_how">How It Works</a></li>
+          <li><a href="#about" data-i18n="nav_about">About Us</a></li>
+          <li><a href="#privacy" data-i18n="foot_privacy">Privacy Policy</a></li>
+          <li><a href="#terms" data-i18n="foot_terms">Terms of Use</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 data-i18n="foot_contact">Contact</h3>
+        <ul>
+          <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+          <li class="muted">hello@restock.example<br><small data-i18n="foot_email_note">Demo address, not monitored</small></li>
+        </ul>
+        <label class="lang-select lang-select--footer">
+          <span class="sr-only" data-i18n="lang_label">Language</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <select id="langSelectFooter" class="js-lang">
+            <option value="en">English</option>
+            <option value="mr">मराठी</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <p id="copyright"></p>
+      <p class="footer__note" data-i18n="translated_note">Translated: navigation, headings, buttons, labels, placeholders and messages. Product names, supplier data and policy text stay unchanged.</p>
+    </div>
+  </footer>
+
+  <button class="back-top" id="backTop" type="button" aria-label="Back to top" data-i18n-aria="backtop" hidden>↑</button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============ MODALS ============ -->
+  <div class="modal" id="detailModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <button class="modal__close" type="button" data-close aria-label="Close" data-i18n-aria="btn_close">×</button>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="quoteModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="quoteTitle">
+      <button class="modal__close" type="button" data-close aria-label="Close" data-i18n-aria="btn_close">×</button>
+      <h2 id="quoteTitle" data-i18n="quote_title">Request a Quote</h2>
+      <form id="quoteForm" novalidate>
+        <div class="field">
+          <label for="qBuyer" data-i18n="q_buyer">Buyer / business name</label>
+          <input id="qBuyer" type="text" maxlength="80" autocomplete="off" data-autofocus>
+          <p class="field-error" id="qBuyerErr"></p>
+        </div>
+        <div class="field">
+          <label for="qEmail" data-i18n="q_email">Email</label>
+          <input id="qEmail" type="email" maxlength="120" autocomplete="off">
+          <p class="field-error" id="qEmailErr"></p>
+        </div>
+        <div class="field">
+          <label for="qProduct" data-i18n="q_product">Product</label>
+          <select id="qProduct"></select>
+          <p class="field-error" id="qProductErr"></p>
+        </div>
+        <div class="field">
+          <label for="qQty" data-i18n="q_qty">Required quantity</label>
+          <input id="qQty" type="number" min="1" step="1" inputmode="numeric">
+          <p class="field-error" id="qQtyErr"></p>
+        </div>
+        <div class="field">
+          <label for="qMsg" data-i18n="q_msg">Message (optional)</label>
+          <textarea id="qMsg" rows="3" maxlength="300"></textarea>
+        </div>
+        <p class="hint" data-i18n="q_privacy">Demo only: use a sample email. Nothing is emailed; the request is saved in this browser.</p>
+        <button class="btn btn--primary" type="submit" data-i18n="btn_send_quote">Submit Request</button>
+      </form>
+      <div id="quoteSuccess" class="quote-success" hidden>
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h3 data-i18n="quote_success_title">Quote request saved</h3>
+        <p id="quoteSuccessText"></p>
+        <button class="btn btn--primary" type="button" data-close data-i18n="btn_close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="accountModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+      <button class="modal__close" type="button" data-close aria-label="Close" data-i18n-aria="btn_close">×</button>
+      <h2 id="accountTitle" data-i18n="account_title">Demo prototype</h2>
+      <p data-i18n="account_text">ReStock has no accounts or passwords. Everything works without signing in, so you can try the prototype right away.</p>
+      <div class="modal__actions">
+        <a class="btn btn--primary" href="#products" data-close data-i18n="account_buyer" data-autofocus>Browse as a buyer</a>
+        <a class="btn btn--outline" href="#sell" data-close data-i18n="account_seller">List as a seller</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="progress" aria-hidden="true"></div>
+  <button class="btn btn--teal" id="bulkFab" type="button" hidden>📦 <span data-i18n="c_title">Bulk order</span><b id="bulkCount">0</b></button>
+  <div class="modal" id="authModal" hidden>
+    <div class="modal__backdrop" data-b2bclose></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button class="modal__close" type="button" data-b2bclose aria-label="Close">×</button>
+      <h2 id="authTitle"></h2>
+      <p class="hint" id="authMode"></p>
+      <form id="authForm" novalidate>
+        <div class="field a-up"><label for="aName" data-i18n="a_name">Business name</label><input id="aName" maxlength="80" autocomplete="organization"></div>
+        <div class="field"><label for="aEmail" data-i18n="a_email">Email</label><input id="aEmail" type="email" autocomplete="email"></div>
+        <div class="field a-pw"><label for="aPass" data-i18n="a_pass">Password</label><input id="aPass" type="password" minlength="6" autocomplete="current-password"></div>
+        <div class="field a-role"><label for="aRole" data-i18n="a_role">I am a</label><select id="aRole"><option value="buyer" data-i18n="role_buyer">Buyer</option><option value="supplier" data-i18n="role_supplier">Supplier</option></select></div>
+        <p class="field-error" id="authErr" role="alert"></p>
+        <button class="btn btn--primary" type="submit" id="authSubmit"></button>
+        <p style="margin-top:12px"><button class="link-btn" type="button" id="authSwitch"></button></p>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="bulkModal" hidden>
+    <div class="modal__backdrop" data-b2bclose></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+      <button class="modal__close" type="button" data-b2bclose aria-label="Close">×</button>
+      <h2 id="bulkTitle" data-i18n="c_title">Bulk order</h2>
+      <div id="bulkBody"></div>
+    </div>
+  </div>
+
+  <script>
+/* ReStock sample data. Everything here is FICTIONAL and for demo purposes only. */
+(function () {
+  'use strict';
+
+  var categories = [
+    { id: 'electronics', emoji: '🔌', from: '#dbe7ff', to: '#b9d0ff' },
+    { id: 'packaging',   emoji: '📦', from: '#fdebd0', to: '#f6d3a1' },
+    { id: 'office',      emoji: '🖊️', from: '#e3e8f5', to: '#c8d2ee' },
+    { id: 'textiles',    emoji: '👕', from: '#fde2ec', to: '#f8bfd6' },
+    { id: 'food',        emoji: '🍚', from: '#fff1c9', to: '#fbe08d' },
+    { id: 'agri',        emoji: '🌱', from: '#dcf5e3', to: '#b4e8c4' },
+    { id: 'home',        emoji: '🍳', from: '#d9f3f1', to: '#aee6e1' },
+    { id: 'industrial',  emoji: '⚙️', from: '#e4e7ec', to: '#c6ccd6' }
+  ];
+
+  var suppliers = [
+    { id: 's1', name: 'Sahyadri Trade Hub',        cats: ['electronics', 'office'],  city: 'Pune, Maharashtra',
+      desc: 'Fictional wholesaler of everyday electronics accessories for retailers and offices.' },
+    { id: 's2', name: 'Bluewave Packaging Co.',    cats: ['packaging'],              city: 'Nashik, Maharashtra',
+      desc: 'Fictional packaging supplier with boxes, wraps and bags for small shops and e-commerce sellers.' },
+    { id: 's3', name: 'Metro Office Mart',         cats: ['office'],                 city: 'Mumbai, Maharashtra',
+      desc: 'Fictional stationery and paper distributor serving small offices and schools.' },
+    { id: 's4', name: 'Kalyani Textiles & Garments', cats: ['textiles'],             city: 'Solapur, Maharashtra',
+      desc: 'Fictional cotton garment and bag maker supplying printing and gifting businesses.' },
+    { id: 's5', name: 'FreshCrate Foods',          cats: ['food'],                   city: 'Satara, Maharashtra',
+      desc: 'Fictional grocery and staples supplier for kirana stores and small restaurants.' },
+    { id: 's6', name: 'GreenRow Agro Supplies',    cats: ['agri'],            city: 'Kolhapur, Maharashtra',
+      desc: 'Fictional supplier of farm inputs and irrigation equipment for local growers.' },
+    { id: 's7', name: 'Anand Kitchenware',         cats: ['home'],                   city: 'Nagpur, Maharashtra',
+      desc: 'Fictional kitchen and home goods maker supplying retailers and caterers.' },
+    { id: 's8', name: 'Deccan Industrial Works',   cats: ['industrial'],             city: 'Aurangabad, Maharashtra',
+      desc: 'Fictional supplier of workshop safety gear and fasteners for small factories.' }
+  ];
+
+  // price = per unit in INR, moq = minimum order quantity, available = fictional stock
+  var products = [
+    { id: 'p1',  name: 'USB-C Fast Charging Cable (1 m)', cat: 'electronics', price: 95,   unit: 'piece', moq: 50,  available: 2000,  supplier: 'Sahyadri Trade Hub',
+      desc: 'Braided 1 m cable with fast-charge support. Popular with mobile accessory shops.', emoji: '🔌' },
+    { id: 'p2',  name: 'Wireless Optical Mouse',          cat: 'electronics', price: 260,  unit: 'piece', moq: 20,  available: 600,   supplier: 'Sahyadri Trade Hub',
+      desc: '2.4 GHz wireless mouse with USB receiver. Suitable for office and school bulk orders.', emoji: '🖱️' },
+    { id: 'p3',  name: 'Corrugated Shipping Boxes (12×9×6 in)', cat: 'packaging', price: 18, unit: 'box', moq: 200, available: 10000, supplier: 'Bluewave Packaging Co.',
+      desc: 'Sturdy 3-ply boxes for parcels and small e-commerce shipments.', emoji: '📦' },
+    { id: 'p4',  name: 'Bubble Wrap Roll (50 m)',         cat: 'packaging',   price: 420,  unit: 'roll',  moq: 10,  available: 300,   supplier: 'Bluewave Packaging Co.',
+      desc: 'Protective air-bubble roll for fragile items. 50 m long, 1 m wide.', emoji: '🎁' },
+    { id: 'p5',  name: 'Kraft Paper Carry Bags (Medium)', cat: 'packaging',   price: 7.5,  unit: 'bag',   moq: 500, available: 20000, supplier: 'Bluewave Packaging Co.',
+      desc: 'Plain brown paper bags with flat handles. Good for bakeries and boutiques.', emoji: '🛍️' },
+    { id: 'p6',  name: 'A4 Copier Paper (500 sheets)',    cat: 'office',      price: 285,  unit: 'ream',  moq: 25,  available: 1500,  supplier: 'Metro Office Mart',
+      desc: '75 GSM white paper for printers and copiers. Sold per ream.', emoji: '📄' },
+    { id: 'p7',  name: 'Gel Pens, Blue (Box of 50)',      cat: 'office',      price: 210,  unit: 'box',   moq: 10,  available: 800,   supplier: 'Metro Office Mart',
+      desc: 'Smooth-writing 0.5 mm gel pens. 50 pens per box.', emoji: '🖊️' },
+    { id: 'p8',  name: 'Cotton T-Shirts, Round Neck',     cat: 'textiles',    price: 165,  unit: 'piece', moq: 100, available: 3000,  supplier: 'Kalyani Textiles & Garments',
+      desc: 'Plain 180 GSM cotton tees, ready for printing. Assorted sizes on request.', emoji: '👕' },
+    { id: 'p9',  name: 'Cotton Tote Bags (Plain)',        cat: 'textiles',    price: 48,   unit: 'bag',   moq: 200, available: 5000,  supplier: 'Kalyani Textiles & Garments',
+      desc: 'Natural cotton totes with reinforced handles for events and retail.', emoji: '👜' },
+    { id: 'p10', name: 'Basmati Rice (Loose)',            cat: 'food',        price: 82,   unit: 'kg',    moq: 100, available: 4000,  supplier: 'FreshCrate Foods',
+      desc: 'Long-grain aged rice for restaurants and kirana stores. Sold by the kilogram.', emoji: '🍚' },
+    { id: 'p11', name: 'Cold-Pressed Groundnut Oil (1 L)', cat: 'food',       price: 185,  unit: 'bottle', moq: 24, available: 500,   supplier: 'FreshCrate Foods',
+      desc: 'Cold-pressed oil in 1 litre bottles. Case quantities for small retailers.', emoji: '🫒' },
+    { id: 'p12', name: 'Organic Vermicompost (5 kg bag)', cat: 'agri',        price: 140,  unit: 'bag',   moq: 40,  available: 1200,  supplier: 'GreenRow Agro Supplies',
+      desc: 'Nutrient-rich compost for nurseries and small farms.', emoji: '🌱' },
+    { id: 'p13', name: 'Drip Irrigation Kit (0.5 acre)',  cat: 'agri',        price: 3800, unit: 'kit',   moq: 5,   available: 60,    supplier: 'GreenRow Agro Supplies',
+      desc: 'Starter drip kit with tubing, drippers and fittings for half an acre.', emoji: '💧' },
+    { id: 'p14', name: 'Stainless Steel Lunch Box (3-tier)', cat: 'home',     price: 340,  unit: 'piece', moq: 30,  available: 700,   supplier: 'Anand Kitchenware',
+      desc: 'Leak-resistant tiffin with three containers. Popular for corporate gifting.', emoji: '🍱' },
+    { id: 'p15', name: 'Non-Stick Cookware Set (3 pcs)',  cat: 'home',        price: 1150, unit: 'set',   moq: 10,  available: 150,   supplier: 'Anand Kitchenware',
+      desc: 'Fry pan, kadai and tawa set with heat-resistant handles.', emoji: '🍳' },
+    { id: 'p16', name: 'Industrial Safety Helmet (Yellow)', cat: 'industrial', price: 210, unit: 'piece', moq: 25,  available: 400,   supplier: 'Deccan Industrial Works',
+      desc: 'Adjustable-strap hard hat for workshops and small construction sites.', emoji: '⛑️' },
+    { id: 'p17', name: 'Heavy-Duty Work Gloves (Pair)',   cat: 'industrial',  price: 65,   unit: 'pair',  moq: 100, available: 2500,  supplier: 'Deccan Industrial Works',
+      desc: 'Cotton-lined gloves with a grip coating for handling and loading work.', emoji: '🧤' },
+    { id: 'p18', name: 'Stainless Steel Hex Bolts (Box of 100)', cat: 'industrial', price: 320, unit: 'box', moq: 20, available: 500, supplier: 'Deccan Industrial Works',
+      desc: 'M8 hex bolts with nuts, packed 100 per box.', emoji: '🔩' }
+  ];
+
+  window.RESTOCK_DATA = { categories: categories, suppliers: suppliers, products: products };
+})();
+
+</script>
+  <script>
+/* ReStock translation dictionary: English (en), Marathi (mr), Hindi (hi).
+   Translated: navigation, headings, buttons, labels, placeholders, messages.
+   NOT translated: product names/descriptions, supplier data, privacy/terms body text. */
+(function () {
+  'use strict';
+
+  var en = {
+    doc_title: 'ReStock — Smart B2B Marketplace for Small Businesses',
+    skip: 'Skip to main content',
+    nav_home: 'Home', nav_explore: 'Explore Products', nav_categories: 'Categories', nav_suppliers: 'Find Suppliers',
+    nav_how: 'How It Works', nav_about: 'About Us', nav_contact: 'Contact',
+    btn_login: 'Login', btn_join: 'Join Free', lang_label: 'Language', menu_toggle: 'Toggle menu',
+    hero_badge: 'Prototype • Sample data',
+    hero_title: 'Your Business. Better Suppliers. Smarter Buying.',
+    hero_sub: 'Discover bulk products, compare supplier offers, and request quotations — all in one place.',
+    hero_search_label: 'Search products', hero_search_ph: 'Search products, e.g. paper bags',
+    all_categories: 'All categories', hero_category_label: 'Category',
+    btn_search: 'Search', btn_explore: 'Explore Products', btn_become_supplier: 'Become a Supplier',
+    hero_trust: 'Transparent by design: sample data is clearly labeled, with no fake badges, reviews or payments.',
+    chip_compare: 'Compare prices', chip_moq: 'Check MOQ',
+    cat_title: 'Browse by Category', cat_sub: 'Pick a category to filter the product listings.',
+    cat_items: '{n} product(s)',
+    cat_electronics: 'Electronics & Accessories', cat_packaging: 'Packaging Materials', cat_office: 'Office Supplies',
+    cat_textiles: 'Textiles & Garments', cat_food: 'Food & Grocery', cat_agri: 'Agriculture Supplies',
+    cat_home: 'Home & Kitchen', cat_industrial: 'Industrial Supplies',
+    products_title: 'Explore Products', products_sub: 'Sample listings with prices per unit and minimum order quantities.',
+    sample_data_note: 'All products and suppliers are fictional sample data.',
+    filter_search_label: 'Search by product name', filter_search_ph: 'Search by name',
+    filter_category: 'Category', sort_label: 'Sort by price', sort_default: 'Featured',
+    sort_low: 'Price: Low to High', sort_high: 'Price: High to Low', btn_clear: 'Clear filters',
+    results_count: 'Showing {n} product(s)', supplier_filter: 'Supplier filter: {name}',
+    moq_label: 'MOQ', by_supplier: 'Supplier', btn_details: 'View Details', btn_quote: 'Request Quote',
+    empty_products_title: 'No products found', empty_products_text: 'Try a different search or clear the filters.',
+    wishlist_add: 'Save to wishlist', wishlist_remove: 'Remove from wishlist',
+    wish_added: 'Saved to wishlist', wish_removed: 'Removed from wishlist',
+    badge_custom: 'Added by seller', badge_sample: 'Sample',
+    suppliers_title: 'Find Suppliers', suppliers_sub: 'Browse the supplier directory and view their listed products.',
+    supplier_demo_label: 'Demo supplier — sample data', supplier_not_verified: 'Not verified. Fictional profile for this prototype.',
+    view_products: 'View Products', supplier_products_n: '{n} listed product(s)',
+    match_title: 'Find the Right Products for Your Business',
+    match_sub: 'Smart Match uses simple, transparent rules (category, budget, MOQ and stock). It does not use an AI model.',
+    match_category: 'Product category', match_budget: 'Maximum budget per unit (₹)', match_qty: 'Required quantity',
+    match_btn: 'Find My Match', match_loading: 'Matching…',
+    match_found: '{n} matching product(s) found, sorted by lowest price',
+    match_none_title: 'No exact match yet',
+    match_none_text: 'No product meets all of your category, budget and quantity needs. Try raising your budget, changing the quantity or choosing another category.',
+    match_near: 'Closest options (one rule not met):', why_match: 'Why it matches', why_not: 'What is missing',
+    reason_cat: 'Category matches: {cat}', reason_any_cat: 'Any category selected',
+    reason_price: 'Price ₹{price} is within your ₹{budget} budget (saves ₹{save} per unit)',
+    reason_moq: 'MOQ {moq} is within your quantity of {qty}',
+    reason_stock: '{avail} units available, enough for {qty}',
+    fail_price: 'Price ₹{price} is above your ₹{budget} budget',
+    fail_moq: 'MOQ {moq} is higher than your quantity of {qty}',
+    fail_stock: 'Only {avail} units available (you need {qty})',
+    match_invalid: 'Enter a valid budget and quantity (numbers above 0).',
+    sell_title: 'Sell on ReStock: Add a Product',
+    sell_sub: 'List a product in this demo. It appears in the marketplace immediately and is saved in this browser only.',
+    f_name: 'Product name', f_category: 'Category', f_price: 'Price per unit (₹)', f_available: 'Available quantity',
+    f_moq: 'Minimum order quantity (MOQ)', f_supplier: 'Supplier / business name', f_desc: 'Short description',
+    select_category: 'Select a category', btn_add_product: 'Add Product',
+    err_required: 'This field is required.', err_number: 'Enter a number greater than 0.',
+    err_integer: 'Enter a whole number greater than 0.', err_moq_gt_avail: 'MOQ cannot be more than the available quantity.',
+    err_email: 'Enter a valid email address.', err_qty_moq: 'Quantity must be at least the MOQ ({moq}).',
+    err_form: 'Please fix the highlighted fields.',
+    product_added: 'Product added! It now appears in the marketplace.', view_in_marketplace: 'View in marketplace',
+    quote_title: 'Request a Quote', q_buyer: 'Buyer / business name', q_email: 'Email', q_product: 'Product',
+    q_qty: 'Required quantity', q_msg: 'Message (optional)',
+    q_privacy: 'Demo only: use a sample email. Nothing is emailed; the request is saved in this browser.',
+    btn_send_quote: 'Submit Request', quote_success_title: 'Quote request saved',
+    quote_success_text: 'Your request for {qty} × {product} was saved in this browser and appears on the dashboard. No email was sent because this is a demo.',
+    btn_close: 'Close', loading: 'Loading…',
+    detail_available: 'Available', detail_total_moq: 'Estimated total at MOQ',
+    detail_note: 'Sample listing; the price is indicative only.',
+    dash_title: 'Local Demo Dashboard',
+    dash_sub: "Real counts calculated from this browser's prototype data. Not a shared database.",
+    d_total: 'Total demo products', d_added: 'Products added by seller', d_quotes: 'Quotation requests', d_wish: 'Wishlist items',
+    d_recent: 'Recent activity', d_quotes_list: 'Recent quotation requests',
+    d_empty_activity: 'No activity yet. Add a product or request a quote to get started.',
+    d_empty_quotes: 'No quotation requests yet.', d_clear: 'Reset demo data', d_cleared: 'Demo data reset.',
+    d_confirm: 'Delete all products, quotes and wishlist items saved in this browser?',
+    act_product: 'Added product: {name}', act_quote: 'Requested quote for {name} (qty {qty})', act_wish: 'Saved to wishlist: {name}',
+    storage_note: 'Data is stored in this browser (localStorage) and is not a shared production database.',
+    storage_unavailable: 'Browser storage is unavailable, so data lasts only until you close this page.',
+    how_title: 'How It Works',
+    how_s1_t: 'Search for products', how_s1_d: 'Search by name or browse categories to find what your business needs.',
+    how_s2_t: 'Compare offers and find a supplier', how_s2_d: 'Compare unit prices and MOQs, or use Smart Match to shortlist products.',
+    how_s3_t: 'Request a quotation', how_s3_d: 'Send a quote request to connect with the supplier. In this demo, requests are saved locally.',
+    sellers_title: 'For Sellers', sellers_sub: 'List your products so small businesses can find them.',
+    sellers_s1: 'Add your product with price, stock and MOQ.', sellers_s2: 'It appears in the marketplace and in Smart Match.',
+    sellers_s3: 'Buyers send quote requests for your product.', sellers_cta: 'Add a product',
+    about_title: 'About ReStock',
+    about_p1: 'ReStock is a prototype concept designed to make bulk sourcing easier for small businesses.',
+    about_p2: 'It focuses on convenience, easy price comparison and simpler supplier discovery. It is a hackathon demo, not a live business.',
+    about_v1_t: 'Convenience', about_v1_d: 'One place to search, shortlist and ask for quotes.',
+    about_v2_t: 'Price comparison', about_v2_d: 'See unit prices and MOQs side by side.',
+    about_v3_t: 'Supplier discovery', about_v3_d: 'Find suppliers by category and location.',
+    contact_title: 'Contact Us', contact_sub: 'Demo form: messages are not sent to a real company.',
+    c_name: 'Name', c_email: 'Email', c_subject: 'Subject', c_message: 'Message', btn_send_msg: 'Send Message',
+    contact_ok: 'Thanks! This is a demo, so your message was not sent anywhere.',
+    footer_desc: 'ReStock is a prototype B2B marketplace concept for small businesses. Sample data only.',
+    foot_marketplace: 'Marketplace', foot_suppliers: 'Suppliers', foot_help: 'Help & Support', foot_contact: 'Contact',
+    foot_smart: 'Smart Match', foot_dashboard: 'Dashboard', foot_for_sellers: 'For Sellers', foot_add_product: 'Add a Product',
+    foot_privacy: 'Privacy Policy', foot_terms: 'Terms of Use', foot_email_note: 'Demo address, not monitored',
+    foot_copyright: '© {year} ReStock (prototype). Hackathon demo, not a registered business.',
+    translated_note: 'Translated: navigation, headings, buttons, labels, placeholders and messages. Product names, supplier data and policy text stay unchanged.',
+    privacy_title: 'Privacy Policy (Demo Example)', terms_title: 'Terms of Use (Demo Example)',
+    legal_note: 'This is an example page for a prototype, not legal advice. Policy text is shown in English only.',
+    backtop: 'Back to top',
+    account_title: 'Demo prototype',
+    account_text: 'ReStock has no accounts or passwords. Everything works without signing in, so you can try the prototype right away.',
+    account_buyer: 'Browse as a buyer', account_seller: 'List as a seller'
+  };
+
+  var mr = {
+    doc_title: 'ReStock — छोट्या व्यवसायांसाठी स्मार्ट B2B मार्केटप्लेस',
+    skip: 'मुख्य मजकुराकडे जा',
+    nav_home: 'मुख्यपृष्ठ', nav_explore: 'उत्पादने पहा', nav_categories: 'श्रेणी', nav_suppliers: 'पुरवठादार शोधा',
+    nav_how: 'हे कसे कार्य करते', nav_about: 'आमच्याबद्दल', nav_contact: 'संपर्क',
+    btn_login: 'लॉगिन', btn_join: 'मोफत सामील व्हा', lang_label: 'भाषा', menu_toggle: 'मेनू उघडा/बंद करा',
+    hero_badge: 'प्रोटोटाइप • नमुना डेटा',
+    hero_title: 'तुमचा व्यवसाय. उत्तम पुरवठादार. हुशार खरेदी.',
+    hero_sub: 'घाऊक उत्पादने शोधा, पुरवठादारांच्या ऑफरची तुलना करा आणि कोटेशन मागवा — सर्व एकाच ठिकाणी.',
+    hero_search_label: 'उत्पादने शोधा', hero_search_ph: 'उत्पादने शोधा, उदा. कागदी पिशव्या',
+    all_categories: 'सर्व श्रेणी', hero_category_label: 'श्रेणी',
+    btn_search: 'शोधा', btn_explore: 'उत्पादने पहा', btn_become_supplier: 'पुरवठादार व्हा',
+    hero_trust: 'पारदर्शक रचना: नमुना डेटा स्पष्टपणे नमूद केला आहे; बनावट बॅज, पुनरावलोकने किंवा पेमेंट नाहीत.',
+    chip_compare: 'किंमतींची तुलना', chip_moq: 'MOQ तपासा',
+    cat_title: 'श्रेणीनुसार पहा', cat_sub: 'उत्पादन यादी फिल्टर करण्यासाठी श्रेणी निवडा.',
+    cat_items: '{n} उत्पादने',
+    cat_electronics: 'इलेक्ट्रॉनिक्स आणि अॅक्सेसरीज', cat_packaging: 'पॅकेजिंग साहित्य', cat_office: 'कार्यालयीन साहित्य',
+    cat_textiles: 'वस्त्रोद्योग आणि कपडे', cat_food: 'अन्न आणि किराणा', cat_agri: 'शेती साहित्य',
+    cat_home: 'घर आणि स्वयंपाकघर', cat_industrial: 'औद्योगिक साहित्य',
+    products_title: 'उत्पादने पहा', products_sub: 'प्रति युनिट किंमत आणि किमान ऑर्डर प्रमाणासह नमुना यादी.',
+    sample_data_note: 'सर्व उत्पादने आणि पुरवठादार काल्पनिक नमुना डेटा आहेत.',
+    filter_search_label: 'उत्पादनाच्या नावाने शोधा', filter_search_ph: 'नावाने शोधा',
+    filter_category: 'श्रेणी', sort_label: 'किंमतीनुसार क्रम', sort_default: 'निवडक',
+    sort_low: 'किंमत: कमी ते जास्त', sort_high: 'किंमत: जास्त ते कमी', btn_clear: 'फिल्टर साफ करा',
+    results_count: '{n} उत्पादने दाखवत आहे', supplier_filter: 'पुरवठादार फिल्टर: {name}',
+    moq_label: 'किमान ऑर्डर (MOQ)', by_supplier: 'पुरवठादार', btn_details: 'तपशील पहा', btn_quote: 'कोटेशन मागवा',
+    empty_products_title: 'उत्पादने सापडली नाहीत', empty_products_text: 'वेगळा शोध वापरा किंवा फिल्टर साफ करा.',
+    wishlist_add: 'इच्छासूचीत जोडा', wishlist_remove: 'इच्छासूचीतून काढा',
+    wish_added: 'इच्छासूचीत जोडले', wish_removed: 'इच्छासूचीतून काढले',
+    badge_custom: 'विक्रेत्याने जोडले', badge_sample: 'नमुना',
+    suppliers_title: 'पुरवठादार शोधा', suppliers_sub: 'पुरवठादारांची यादी पहा आणि त्यांची उत्पादने पहा.',
+    supplier_demo_label: 'डेमो पुरवठादार — नमुना डेटा', supplier_not_verified: 'पडताळणी केलेली नाही. या प्रोटोटाइपसाठी काल्पनिक प्रोफाइल.',
+    view_products: 'उत्पादने पहा', supplier_products_n: '{n} सूचीबद्ध उत्पादने',
+    match_title: 'तुमच्या व्यवसायासाठी योग्य उत्पादने शोधा',
+    match_sub: 'स्मार्ट मॅच साधे, पारदर्शक नियम वापरते (श्रेणी, बजेट, MOQ आणि साठा). यात AI मॉडेल वापरलेले नाही.',
+    match_category: 'उत्पादन श्रेणी', match_budget: 'प्रति युनिट कमाल बजेट (₹)', match_qty: 'आवश्यक प्रमाण',
+    match_btn: 'माझे मॅच शोधा', match_loading: 'जुळवत आहे…',
+    match_found: '{n} जुळणारी उत्पादने सापडली, सर्वात कमी किंमतीनुसार',
+    match_none_title: 'अजून अचूक जुळणी नाही',
+    match_none_text: 'तुमची श्रेणी, बजेट आणि प्रमाणाच्या सर्व गरजा पूर्ण करणारे उत्पादन नाही. बजेट वाढवा, प्रमाण बदला किंवा दुसरी श्रेणी निवडा.',
+    match_near: 'सर्वात जवळचे पर्याय (एक नियम पूर्ण होत नाही):', why_match: 'का जुळते', why_not: 'काय कमी आहे',
+    reason_cat: 'श्रेणी जुळते: {cat}', reason_any_cat: 'कोणतीही श्रेणी निवडली',
+    reason_price: 'किंमत ₹{price} तुमच्या ₹{budget} बजेटमध्ये आहे (प्रति युनिट ₹{save} बचत)',
+    reason_moq: 'किमान ऑर्डर {moq} तुमच्या {qty} प्रमाणात बसते',
+    reason_stock: '{avail} युनिट उपलब्ध, {qty} साठी पुरेसे',
+    fail_price: 'किंमत ₹{price} तुमच्या ₹{budget} बजेटपेक्षा जास्त आहे',
+    fail_moq: 'किमान ऑर्डर {moq} तुमच्या {qty} प्रमाणापेक्षा जास्त आहे',
+    fail_stock: 'फक्त {avail} युनिट उपलब्ध (तुम्हाला {qty} हवे)',
+    match_invalid: 'वैध बजेट आणि प्रमाण टाका (० पेक्षा जास्त संख्या).',
+    sell_title: 'ReStock वर विका: उत्पादन जोडा',
+    sell_sub: 'या डेमोमध्ये उत्पादन जोडा. ते लगेच मार्केटप्लेसमध्ये दिसते आणि फक्त या ब्राउझरमध्ये साठवले जाते.',
+    f_name: 'उत्पादनाचे नाव', f_category: 'श्रेणी', f_price: 'प्रति युनिट किंमत (₹)', f_available: 'उपलब्ध प्रमाण',
+    f_moq: 'किमान ऑर्डर प्रमाण (MOQ)', f_supplier: 'पुरवठादार / व्यवसायाचे नाव', f_desc: 'थोडक्यात वर्णन',
+    select_category: 'श्रेणी निवडा', btn_add_product: 'उत्पादन जोडा',
+    err_required: 'हे फील्ड आवश्यक आहे.', err_number: '० पेक्षा मोठी संख्या टाका.',
+    err_integer: '० पेक्षा मोठी पूर्ण संख्या टाका.', err_moq_gt_avail: 'MOQ उपलब्ध प्रमाणापेक्षा जास्त असू शकत नाही.',
+    err_email: 'वैध ईमेल पत्ता टाका.', err_qty_moq: 'प्रमाण किमान MOQ ({moq}) इतके असावे.',
+    err_form: 'कृपया हायलाइट केलेली फील्ड दुरुस्त करा.',
+    product_added: 'उत्पादन जोडले! ते आता मार्केटप्लेसमध्ये दिसते.', view_in_marketplace: 'मार्केटप्लेसमध्ये पहा',
+    quote_title: 'कोटेशन मागवा', q_buyer: 'खरेदीदार / व्यवसायाचे नाव', q_email: 'ईमेल', q_product: 'उत्पादन',
+    q_qty: 'आवश्यक प्रमाण', q_msg: 'संदेश (ऐच्छिक)',
+    q_privacy: 'फक्त डेमो: नमुना ईमेल वापरा. काहीही ईमेल केले जात नाही; विनंती या ब्राउझरमध्ये साठवली जाते.',
+    btn_send_quote: 'विनंती सबमिट करा', quote_success_title: 'कोटेशन विनंती जतन केली',
+    quote_success_text: '{qty} × {product} साठीची तुमची विनंती या ब्राउझरमध्ये जतन झाली आणि डॅशबोर्डवर दिसते. हा डेमो असल्याने कोणताही ईमेल पाठवला नाही.',
+    btn_close: 'बंद करा', loading: 'लोड होत आहे…',
+    detail_available: 'उपलब्ध', detail_total_moq: 'MOQ वर अंदाजे एकूण',
+    detail_note: 'नमुना यादी; किंमत फक्त सूचक आहे.',
+    dash_title: 'स्थानिक डेमो डॅशबोर्ड',
+    dash_sub: 'या ब्राउझरच्या प्रोटोटाइप डेटावरून मोजलेली खरी संख्या. शेअर्ड डेटाबेस नाही.',
+    d_total: 'एकूण डेमो उत्पादने', d_added: 'विक्रेत्याने जोडलेली उत्पादने', d_quotes: 'कोटेशन विनंत्या', d_wish: 'इच्छासूची आयटम',
+    d_recent: 'अलीकडील हालचाली', d_quotes_list: 'अलीकडील कोटेशन विनंत्या',
+    d_empty_activity: 'अजून कोणतीही हालचाल नाही. उत्पादन जोडा किंवा कोटेशन मागवा.',
+    d_empty_quotes: 'अजून कोटेशन विनंत्या नाहीत.', d_clear: 'डेमो डेटा रीसेट करा', d_cleared: 'डेमो डेटा रीसेट झाला.',
+    d_confirm: 'या ब्राउझरमध्ये साठवलेली सर्व उत्पादने, कोटेशन आणि इच्छासूची हटवायची?',
+    act_product: 'उत्पादन जोडले: {name}', act_quote: '{name} साठी कोटेशन मागवले (प्रमाण {qty})', act_wish: 'इच्छासूचीत जोडले: {name}',
+    storage_note: 'डेटा या ब्राउझरमध्ये (localStorage) साठवला जातो; तो शेअर्ड प्रॉडक्शन डेटाबेस नाही.',
+    storage_unavailable: 'ब्राउझर स्टोरेज उपलब्ध नाही, म्हणून डेटा हे पान बंद करेपर्यंतच राहील.',
+    how_title: 'हे कसे कार्य करते',
+    how_s1_t: 'उत्पादने शोधा', how_s1_d: 'नावाने शोधा किंवा श्रेणी पहा आणि तुमच्या व्यवसायाला काय हवे ते शोधा.',
+    how_s2_t: 'ऑफरची तुलना करा आणि पुरवठादार शोधा', how_s2_d: 'युनिट किंमती आणि MOQ ची तुलना करा किंवा स्मार्ट मॅचने उत्पादनांची निवड करा.',
+    how_s3_t: 'कोटेशन मागवा', how_s3_d: 'पुरवठादाराशी संपर्क साधण्यासाठी कोटेशन विनंती पाठवा. या डेमोमध्ये विनंत्या स्थानिक पातळीवर साठवल्या जातात.',
+    sellers_title: 'विक्रेत्यांसाठी', sellers_sub: 'तुमची उत्पादने सूचीबद्ध करा म्हणजे छोटे व्यवसाय ती शोधू शकतील.',
+    sellers_s1: 'किंमत, साठा आणि MOQ सह उत्पादन जोडा.', sellers_s2: 'ते मार्केटप्लेस आणि स्मार्ट मॅचमध्ये दिसते.',
+    sellers_s3: 'खरेदीदार तुमच्या उत्पादनासाठी कोटेशन विनंत्या पाठवतात.', sellers_cta: 'उत्पादन जोडा',
+    about_title: 'ReStock बद्दल',
+    about_p1: 'ReStock ही छोट्या व्यवसायांसाठी घाऊक खरेदी सोपी करण्यासाठी तयार केलेली प्रोटोटाइप संकल्पना आहे.',
+    about_p2: 'हे सोय, किंमतींची सोपी तुलना आणि पुरवठादारांचा सुलभ शोध यावर लक्ष केंद्रित करते. हा हॅकाथॉन डेमो आहे, प्रत्यक्ष व्यवसाय नाही.',
+    about_v1_t: 'सोय', about_v1_d: 'शोधणे, निवड करणे आणि कोटेशन मागवणे — एकाच ठिकाणी.',
+    about_v2_t: 'किंमतींची तुलना', about_v2_d: 'युनिट किंमती आणि MOQ शेजारी शेजारी पहा.',
+    about_v3_t: 'पुरवठादार शोध', about_v3_d: 'श्रेणी आणि स्थानानुसार पुरवठादार शोधा.',
+    contact_title: 'आमच्याशी संपर्क साधा', contact_sub: 'डेमो फॉर्म: संदेश कोणत्याही खऱ्या कंपनीला पाठवले जात नाहीत.',
+    c_name: 'नाव', c_email: 'ईमेल', c_subject: 'विषय', c_message: 'संदेश', btn_send_msg: 'संदेश पाठवा',
+    contact_ok: 'धन्यवाद! हा डेमो असल्याने तुमचा संदेश कुठेही पाठवला नाही.',
+    footer_desc: 'ReStock ही छोट्या व्यवसायांसाठी प्रोटोटाइप B2B मार्केटप्लेस संकल्पना आहे. फक्त नमुना डेटा.',
+    foot_marketplace: 'मार्केटप्लेस', foot_suppliers: 'पुरवठादार', foot_help: 'मदत आणि सहाय्य', foot_contact: 'संपर्क',
+    foot_smart: 'स्मार्ट मॅच', foot_dashboard: 'डॅशबोर्ड', foot_for_sellers: 'विक्रेत्यांसाठी', foot_add_product: 'उत्पादन जोडा',
+    foot_privacy: 'गोपनीयता धोरण', foot_terms: 'वापराच्या अटी', foot_email_note: 'डेमो पत्ता, तपासला जात नाही',
+    foot_copyright: '© {year} ReStock (प्रोटोटाइप). हॅकाथॉन डेमो, नोंदणीकृत व्यवसाय नाही.',
+    translated_note: 'अनुवादित: नेव्हिगेशन, शीर्षके, बटणे, लेबल, प्लेसहोल्डर आणि संदेश. उत्पादनांची नावे, पुरवठादार डेटा आणि धोरण मजकूर अपरिवर्तित राहतात.',
+    privacy_title: 'गोपनीयता धोरण (डेमो उदाहरण)', terms_title: 'वापराच्या अटी (डेमो उदाहरण)',
+    legal_note: 'हे प्रोटोटाइपसाठी उदाहरण पान आहे, कायदेशीर सल्ला नाही. धोरणाचा मजकूर फक्त इंग्रजीत आहे.',
+    backtop: 'वर जा',
+    account_title: 'डेमो प्रोटोटाइप',
+    account_text: 'ReStock मध्ये खाती किंवा पासवर्ड नाहीत. साइन इन न करता सर्व काही चालते, त्यामुळे तुम्ही प्रोटोटाइप लगेच वापरून पाहू शकता.',
+    account_buyer: 'खरेदीदार म्हणून पहा', account_seller: 'विक्रेता म्हणून जोडा'
+  };
+
+  var hi = {
+    doc_title: 'ReStock — छोटे व्यवसायों के लिए स्मार्ट B2B मार्केटप्लेस',
+    skip: 'मुख्य सामग्री पर जाएँ',
+    nav_home: 'होम', nav_explore: 'उत्पाद देखें', nav_categories: 'श्रेणियाँ', nav_suppliers: 'आपूर्तिकर्ता खोजें',
+    nav_how: 'यह कैसे काम करता है', nav_about: 'हमारे बारे में', nav_contact: 'संपर्क',
+    btn_login: 'लॉगिन', btn_join: 'निःशुल्क जुड़ें', lang_label: 'भाषा', menu_toggle: 'मेनू खोलें/बंद करें',
+    hero_badge: 'प्रोटोटाइप • नमूना डेटा',
+    hero_title: 'आपका व्यवसाय. बेहतर आपूर्तिकर्ता. स्मार्ट खरीदारी.',
+    hero_sub: 'थोक उत्पाद खोजें, आपूर्तिकर्ताओं के ऑफ़र की तुलना करें और कोटेशन माँगें — सब कुछ एक ही जगह।',
+    hero_search_label: 'उत्पाद खोजें', hero_search_ph: 'उत्पाद खोजें, जैसे पेपर बैग',
+    all_categories: 'सभी श्रेणियाँ', hero_category_label: 'श्रेणी',
+    btn_search: 'खोजें', btn_explore: 'उत्पाद देखें', btn_become_supplier: 'आपूर्तिकर्ता बनें',
+    hero_trust: 'पारदर्शी डिज़ाइन: नमूना डेटा स्पष्ट रूप से लेबल किया गया है; कोई नकली बैज, समीक्षा या भुगतान नहीं।',
+    chip_compare: 'मूल्य तुलना', chip_moq: 'MOQ जाँचें',
+    cat_title: 'श्रेणी के अनुसार देखें', cat_sub: 'उत्पाद सूची फ़िल्टर करने के लिए श्रेणी चुनें।',
+    cat_items: '{n} उत्पाद',
+    cat_electronics: 'इलेक्ट्रॉनिक्स और एक्सेसरीज़', cat_packaging: 'पैकेजिंग सामग्री', cat_office: 'कार्यालय सामग्री',
+    cat_textiles: 'कपड़ा और परिधान', cat_food: 'खाद्य और किराना', cat_agri: 'कृषि सामग्री',
+    cat_home: 'घर और रसोई', cat_industrial: 'औद्योगिक सामग्री',
+    products_title: 'उत्पाद देखें', products_sub: 'प्रति इकाई मूल्य और न्यूनतम ऑर्डर मात्रा के साथ नमूना सूची।',
+    sample_data_note: 'सभी उत्पाद और आपूर्तिकर्ता काल्पनिक नमूना डेटा हैं।',
+    filter_search_label: 'उत्पाद के नाम से खोजें', filter_search_ph: 'नाम से खोजें',
+    filter_category: 'श्रेणी', sort_label: 'मूल्य के अनुसार क्रमबद्ध करें', sort_default: 'विशेष',
+    sort_low: 'मूल्य: कम से अधिक', sort_high: 'मूल्य: अधिक से कम', btn_clear: 'फ़िल्टर साफ़ करें',
+    results_count: '{n} उत्पाद दिखाए जा रहे हैं', supplier_filter: 'आपूर्तिकर्ता फ़िल्टर: {name}',
+    moq_label: 'न्यूनतम ऑर्डर (MOQ)', by_supplier: 'आपूर्तिकर्ता', btn_details: 'विवरण देखें', btn_quote: 'कोटेशन माँगें',
+    empty_products_title: 'कोई उत्पाद नहीं मिला', empty_products_text: 'कोई अलग खोज आज़माएँ या फ़िल्टर साफ़ करें।',
+    wishlist_add: 'विशलिस्ट में जोड़ें', wishlist_remove: 'विशलिस्ट से हटाएँ',
+    wish_added: 'विशलिस्ट में जोड़ा गया', wish_removed: 'विशलिस्ट से हटाया गया',
+    badge_custom: 'विक्रेता द्वारा जोड़ा गया', badge_sample: 'नमूना',
+    suppliers_title: 'आपूर्तिकर्ता खोजें', suppliers_sub: 'आपूर्तिकर्ता निर्देशिका देखें और उनके उत्पाद देखें।',
+    supplier_demo_label: 'डेमो आपूर्तिकर्ता — नमूना डेटा', supplier_not_verified: 'सत्यापित नहीं। इस प्रोटोटाइप के लिए काल्पनिक प्रोफ़ाइल।',
+    view_products: 'उत्पाद देखें', supplier_products_n: '{n} सूचीबद्ध उत्पाद',
+    match_title: 'अपने व्यवसाय के लिए सही उत्पाद खोजें',
+    match_sub: 'स्मार्ट मैच सरल, पारदर्शी नियमों (श्रेणी, बजट, MOQ और स्टॉक) का उपयोग करता है। इसमें AI मॉडल का उपयोग नहीं होता।',
+    match_category: 'उत्पाद श्रेणी', match_budget: 'प्रति इकाई अधिकतम बजट (₹)', match_qty: 'आवश्यक मात्रा',
+    match_btn: 'मेरा मैच खोजें', match_loading: 'मिलान हो रहा है…',
+    match_found: '{n} मेल खाने वाले उत्पाद मिले, सबसे कम मूल्य के क्रम में',
+    match_none_title: 'अभी कोई सटीक मैच नहीं',
+    match_none_text: 'कोई उत्पाद आपकी श्रेणी, बजट और मात्रा की सभी ज़रूरतें पूरी नहीं करता। बजट बढ़ाएँ, मात्रा बदलें या कोई दूसरी श्रेणी चुनें।',
+    match_near: 'सबसे नज़दीकी विकल्प (एक नियम पूरा नहीं होता):', why_match: 'क्यों मेल खाता है', why_not: 'क्या कमी है',
+    reason_cat: 'श्रेणी मेल खाती है: {cat}', reason_any_cat: 'कोई भी श्रेणी चुनी गई',
+    reason_price: 'मूल्य ₹{price} आपके ₹{budget} बजट के भीतर है (प्रति इकाई ₹{save} बचत)',
+    reason_moq: 'न्यूनतम ऑर्डर {moq} आपकी {qty} मात्रा के भीतर है',
+    reason_stock: '{avail} इकाइयाँ उपलब्ध, {qty} के लिए पर्याप्त',
+    fail_price: 'मूल्य ₹{price} आपके ₹{budget} बजट से अधिक है',
+    fail_moq: 'न्यूनतम ऑर्डर {moq} आपकी {qty} मात्रा से अधिक है',
+    fail_stock: 'केवल {avail} इकाइयाँ उपलब्ध (आपको {qty} चाहिए)',
+    match_invalid: 'मान्य बजट और मात्रा दर्ज करें (0 से अधिक संख्या)।',
+    sell_title: 'ReStock पर बेचें: उत्पाद जोड़ें',
+    sell_sub: 'इस डेमो में उत्पाद जोड़ें। यह तुरंत मार्केटप्लेस में दिखता है और केवल इसी ब्राउज़र में सहेजा जाता है।',
+    f_name: 'उत्पाद का नाम', f_category: 'श्रेणी', f_price: 'प्रति इकाई मूल्य (₹)', f_available: 'उपलब्ध मात्रा',
+    f_moq: 'न्यूनतम ऑर्डर मात्रा (MOQ)', f_supplier: 'आपूर्तिकर्ता / व्यवसाय का नाम', f_desc: 'संक्षिप्त विवरण',
+    select_category: 'श्रेणी चुनें', btn_add_product: 'उत्पाद जोड़ें',
+    err_required: 'यह फ़ील्ड आवश्यक है।', err_number: '0 से बड़ी संख्या दर्ज करें।',
+    err_integer: '0 से बड़ी पूर्ण संख्या दर्ज करें।', err_moq_gt_avail: 'MOQ उपलब्ध मात्रा से अधिक नहीं हो सकता।',
+    err_email: 'मान्य ईमेल पता दर्ज करें।', err_qty_moq: 'मात्रा कम से कम MOQ ({moq}) के बराबर होनी चाहिए।',
+    err_form: 'कृपया चिह्नित फ़ील्ड ठीक करें।',
+    product_added: 'उत्पाद जोड़ा गया! यह अब मार्केटप्लेस में दिखता है।', view_in_marketplace: 'मार्केटप्लेस में देखें',
+    quote_title: 'कोटेशन माँगें', q_buyer: 'खरीदार / व्यवसाय का नाम', q_email: 'ईमेल', q_product: 'उत्पाद',
+    q_qty: 'आवश्यक मात्रा', q_msg: 'संदेश (वैकल्पिक)',
+    q_privacy: 'केवल डेमो: नमूना ईमेल उपयोग करें। कुछ भी ईमेल नहीं किया जाता; अनुरोध इसी ब्राउज़र में सहेजा जाता है।',
+    btn_send_quote: 'अनुरोध जमा करें', quote_success_title: 'कोटेशन अनुरोध सहेजा गया',
+    quote_success_text: '{qty} × {product} के लिए आपका अनुरोध इस ब्राउज़र में सहेजा गया और डैशबोर्ड पर दिखता है। यह डेमो है, इसलिए कोई ईमेल नहीं भेजा गया।',
+    btn_close: 'बंद करें', loading: 'लोड हो रहा है…',
+    detail_available: 'उपलब्ध', detail_total_moq: 'MOQ पर अनुमानित कुल',
+    detail_note: 'नमूना सूची; मूल्य केवल सांकेतिक है।',
+    dash_title: 'लोकल डेमो डैशबोर्ड',
+    dash_sub: 'इस ब्राउज़र के प्रोटोटाइप डेटा से गिनी गई वास्तविक संख्याएँ। साझा डेटाबेस नहीं।',
+    d_total: 'कुल डेमो उत्पाद', d_added: 'विक्रेता द्वारा जोड़े गए उत्पाद', d_quotes: 'कोटेशन अनुरोध', d_wish: 'विशलिस्ट आइटम',
+    d_recent: 'हाल की गतिविधि', d_quotes_list: 'हाल के कोटेशन अनुरोध',
+    d_empty_activity: 'अभी कोई गतिविधि नहीं। उत्पाद जोड़ें या कोटेशन माँगें।',
+    d_empty_quotes: 'अभी कोई कोटेशन अनुरोध नहीं।', d_clear: 'डेमो डेटा रीसेट करें', d_cleared: 'डेमो डेटा रीसेट हो गया।',
+    d_confirm: 'इस ब्राउज़र में सहेजे गए सभी उत्पाद, कोटेशन और विशलिस्ट हटाएँ?',
+    act_product: 'उत्पाद जोड़ा: {name}', act_quote: '{name} के लिए कोटेशन माँगा (मात्रा {qty})', act_wish: 'विशलिस्ट में जोड़ा: {name}',
+    storage_note: 'डेटा इसी ब्राउज़र (localStorage) में सहेजा जाता है; यह साझा प्रोडक्शन डेटाबेस नहीं है।',
+    storage_unavailable: 'ब्राउज़र स्टोरेज उपलब्ध नहीं है, इसलिए डेटा केवल इस पेज को बंद करने तक रहेगा।',
+    how_title: 'यह कैसे काम करता है',
+    how_s1_t: 'उत्पाद खोजें', how_s1_d: 'नाम से खोजें या श्रेणियाँ देखें और अपने व्यवसाय की ज़रूरत का सामान ढूँढें।',
+    how_s2_t: 'ऑफ़र की तुलना करें और आपूर्तिकर्ता चुनें', how_s2_d: 'इकाई मूल्य और MOQ की तुलना करें, या स्मार्ट मैच से उत्पादों की शॉर्टलिस्ट बनाएँ।',
+    how_s3_t: 'कोटेशन माँगें', how_s3_d: 'आपूर्तिकर्ता से जुड़ने के लिए कोटेशन अनुरोध भेजें। इस डेमो में अनुरोध लोकल रूप से सहेजे जाते हैं।',
+    sellers_title: 'विक्रेताओं के लिए', sellers_sub: 'अपने उत्पाद सूचीबद्ध करें ताकि छोटे व्यवसाय उन्हें ढूँढ सकें।',
+    sellers_s1: 'मूल्य, स्टॉक और MOQ के साथ अपना उत्पाद जोड़ें।', sellers_s2: 'यह मार्केटप्लेस और स्मार्ट मैच में दिखता है।',
+    sellers_s3: 'खरीदार आपके उत्पाद के लिए कोटेशन अनुरोध भेजते हैं।', sellers_cta: 'उत्पाद जोड़ें',
+    about_title: 'ReStock के बारे में',
+    about_p1: 'ReStock छोटे व्यवसायों के लिए थोक खरीद को आसान बनाने के लिए बनाई गई एक प्रोटोटाइप अवधारणा है।',
+    about_p2: 'यह सुविधा, आसान मूल्य तुलना और आपूर्तिकर्ताओं की सरल खोज पर केंद्रित है। यह हैकाथॉन डेमो है, कोई वास्तविक व्यवसाय नहीं।',
+    about_v1_t: 'सुविधा', about_v1_d: 'खोजने, शॉर्टलिस्ट करने और कोटेशन माँगने के लिए एक जगह।',
+    about_v2_t: 'मूल्य तुलना', about_v2_d: 'इकाई मूल्य और MOQ साथ-साथ देखें।',
+    about_v3_t: 'आपूर्तिकर्ता खोज', about_v3_d: 'श्रेणी और स्थान के अनुसार आपूर्तिकर्ता खोजें।',
+    contact_title: 'हमसे संपर्क करें', contact_sub: 'डेमो फ़ॉर्म: संदेश किसी वास्तविक कंपनी को नहीं भेजे जाते।',
+    c_name: 'नाम', c_email: 'ईमेल', c_subject: 'विषय', c_message: 'संदेश', btn_send_msg: 'संदेश भेजें',
+    contact_ok: 'धन्यवाद! यह डेमो है, इसलिए आपका संदेश कहीं नहीं भेजा गया।',
+    footer_desc: 'ReStock छोटे व्यवसायों के लिए एक प्रोटोटाइप B2B मार्केटप्लेस अवधारणा है। केवल नमूना डेटा।',
+    foot_marketplace: 'मार्केटप्लेस', foot_suppliers: 'आपूर्तिकर्ता', foot_help: 'सहायता और समर्थन', foot_contact: 'संपर्क',
+    foot_smart: 'स्मार्ट मैच', foot_dashboard: 'डैशबोर्ड', foot_for_sellers: 'विक्रेताओं के लिए', foot_add_product: 'उत्पाद जोड़ें',
+    foot_privacy: 'गोपनीयता नीति', foot_terms: 'उपयोग की शर्तें', foot_email_note: 'डेमो पता, मॉनिटर नहीं किया जाता',
+    foot_copyright: '© {year} ReStock (प्रोटोटाइप)। हैकाथॉन डेमो, पंजीकृत व्यवसाय नहीं।',
+    translated_note: 'अनुवादित: नेविगेशन, शीर्षक, बटन, लेबल, प्लेसहोल्डर और संदेश। उत्पादों के नाम, आपूर्तिकर्ता डेटा और नीति पाठ अपरिवर्तित रहते हैं।',
+    privacy_title: 'गोपनीयता नीति (डेमो उदाहरण)', terms_title: 'उपयोग की शर्तें (डेमो उदाहरण)',
+    legal_note: 'यह प्रोटोटाइप के लिए उदाहरण पृष्ठ है, कानूनी सलाह नहीं। नीति का पाठ केवल अंग्रेज़ी में है।',
+    backtop: 'ऊपर जाएँ',
+    account_title: 'डेमो प्रोटोटाइप',
+    account_text: 'ReStock में कोई खाता या पासवर्ड नहीं है। साइन इन किए बिना सब कुछ काम करता है, इसलिए आप प्रोटोटाइप तुरंत आज़मा सकते हैं।',
+    account_buyer: 'खरीदार के रूप में देखें', account_seller: 'विक्रेता के रूप में जोड़ें'
+  };
+
+  window.RESTOCK_I18N = { en: en, mr: mr, hi: hi };
+})();
+
+</script>
+  <script>
+/* ReStock app logic: plain JavaScript, no frameworks, no external services. */
+(function () {
+  'use strict';
+
+  var D = window.RESTOCK_DATA;
+  var I18N = window.RESTOCK_I18N;
+
+  /* ---------- tiny helpers ---------- */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtNum(n) { return Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
+  function fmtPrice(n) { return '₹' + fmtNum(n); }
+  function catById(id) { return D.categories.filter(function (c) { return c.id === id; })[0]; }
+
+  /* ---------- storage (localStorage with in-memory fallback) ---------- */
+  var KEYS = {
+    products: 'restock_custom_products',
+    quotes: 'restock_quotes',
+    activity: 'restock_activity',
+    wish: 'restock_wishlist',
+    lang: 'restock_lang'
+  };
+  var storageOK = true;
+  try { localStorage.setItem('__restock_test', '1'); localStorage.removeItem('__restock_test'); } catch (e) { storageOK = false; }
+  var mem = {};
+  function load(key, fallback) {
+    if (!storageOK) return mem[key] !== undefined ? mem[key] : fallback;
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    if (!storageOK) { mem[key] = value; return; }
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { storageOK = false; mem[key] = value; }
+  }
+
+  /* ---------- state ---------- */
+  var savedLang = load(KEYS.lang, 'en');
+  var state = {
+    lang: I18N[savedLang] ? savedLang : 'en',
+    q: '', cat: '', sort: 'default', supplier: '',
+    custom: load(KEYS.products, []),
+    quotes: load(KEYS.quotes, []),
+    activity: load(KEYS.activity, []),
+    wish: load(KEYS.wish, []),
+    match: null,
+    detailId: null,
+    ready: false
+  };
+
+  function t(key, params) {
+    var dict = I18N[state.lang] || I18N.en;
+    var s = dict[key];
+    if (s === undefined) s = I18N.en[key];
+    if (s === undefined) return key;
+    if (params) {
+      Object.keys(params).forEach(function (k) { s = s.split('{' + k + '}').join(params[k]); });
+    }
+    return s;
+  }
+
+  function allProducts() { return D.products.concat(state.custom); }
+  function productById(id) { return allProducts().filter(function (p) { return p.id === id; })[0]; }
+  function catLabel(id) { return t('cat_' + id); }
+
+  /* ---------- toast ---------- */
+  var toastTimer;
+  function toast(msg, isError) {
+    var el = $('#toast');
+    el.textContent = msg;
+    el.classList.toggle('error', !!isError);
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3200);
+  }
+
+  /* ---------- modals ---------- */
+  var openModalEl = null, lastFocus = null;
+  function openModal(el) {
+    lastFocus = document.activeElement;
+    el.hidden = false;
+    openModalEl = el;
+    document.body.classList.add('modal-open');
+    var f = $('[data-autofocus]', el) || $('button, input, select, textarea, a[href]', el);
+    setTimeout(function () { if (f) f.focus(); }, 0);
+  }
+  function closeModal() {
+    if (!openModalEl) return;
+    openModalEl.hidden = true;
+    openModalEl = null;
+    document.body.classList.remove('modal-open');
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) { /* ignore */ } }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!openModalEl) return;
+    if (e.key === 'Escape') { closeModal(); return; }
+    if (e.key === 'Tab') {
+      var items = $$('button:not([disabled]), input, select, textarea, a[href]', openModalEl).filter(function (n) { return !n.closest('[hidden]'); });
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  $$('.modal').forEach(function (m) {
+    m.addEventListener('click', function (e) {
+      if (e.target.closest('[data-close]')) closeModal();
+    });
+  });
+
+  /* ---------- validation helpers ---------- */
+  function setErr(input, msg) {
+    var err = document.getElementById(input.id + 'Err');
+    if (msg) {
+      input.setAttribute('aria-invalid', 'true');
+      if (err) err.textContent = msg;
+    } else {
+      input.removeAttribute('aria-invalid');
+      if (err) err.textContent = '';
+    }
+    return !msg;
+  }
+  function clearErrors(form) {
+    $$('[aria-invalid]', form).forEach(function (i) { i.removeAttribute('aria-invalid'); });
+    $$('.field-error', form).forEach(function (e) { e.textContent = ''; });
+  }
+  function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+  function parseNum(v) { var n = Number(String(v).trim()); return String(v).trim() === '' || !isFinite(n) ? NaN : n; }
+  function isWhole(n) { return Math.floor(n) === n; }
+
+  /* ---------- rendering: selects ---------- */
+  function fillCategorySelect(sel, firstLabelKey) {
+    var prev = sel.value;
+    var html = '<option value="">' + esc(t(firstLabelKey)) + '</option>';
+    D.categories.forEach(function (c) { html += '<option value="' + c.id + '">' + esc(catLabel(c.id)) + '</option>'; });
+    sel.innerHTML = html;
+    sel.value = prev || '';
+  }
+  function renderSelects() {
+    fillCategorySelect($('#heroCategory'), 'all_categories');
+    fillCategorySelect($('#filterCategory'), 'all_categories');
+    fillCategorySelect($('#matchCategory'), 'all_categories');
+    fillCategorySelect($('#pCategory'), 'select_category');
+    $('#heroCategory').value = state.cat;
+    $('#filterCategory').value = state.cat;
+  }
+  function renderQuoteProducts(selectedId) {
+    var sel = $('#qProduct');
+    var cur = selectedId || sel.value;
+    sel.innerHTML = allProducts().map(function (p) {
+      return '<option value="' + esc(p.id) + '">' + esc(p.name) + ' — ' + esc(p.supplier) + '</option>';
+    }).join('');
+    if (cur) sel.value = cur;
+  }
+
+  /* ---------- rendering: categories ---------- */
+  function renderCategories() {
+    var prods = allProducts();
+    $('#categoryGrid').innerHTML = D.categories.map(function (c) {
+      var n = prods.filter(function (p) { return p.cat === c.id; }).length;
+      return '<button type="button" class="cat-card" data-cat="' + c.id + '">' +
+        '<span class="cat-card__icon" style="background:linear-gradient(135deg,' + c.from + ',' + c.to + ')" aria-hidden="true">' + c.emoji + '</span>' +
+        '<span class="cat-card__name">' + esc(catLabel(c.id)) + '</span>' +
+        '<span class="cat-card__count">' + esc(t('cat_items', { n: n })) + '</span></button>';
+    }).join('');
+  }
+
+  /* ---------- rendering: product cards ---------- */
+  function productCard(p, extraHTML) {
+    var c = catById(p.cat) || D.categories[0];
+    var wished = state.wish.indexOf(p.id) !== -1;
+    return '<article class="card product" data-id="' + esc(p.id) + '">' +
+      '<div class="product__art" style="background:linear-gradient(135deg,' + c.from + ',' + c.to + ')" role="img" aria-label="' + esc(p.name) + '">' +
+      '<span aria-hidden="true">' + (p.emoji || c.emoji) + '</span>' +
+      '<em class="tag' + (p.custom ? ' tag--teal' : '') + '">' + esc(t(p.custom ? 'badge_custom' : 'badge_sample')) + '</em>' +
+      '<button type="button" class="wish' + (wished ? ' is-on' : '') + '" data-action="wish" data-id="' + esc(p.id) + '" aria-pressed="' + wished + '" aria-label="' + esc(t(wished ? 'wishlist_remove' : 'wishlist_add')) + '">♥</button>' +
+      '</div>' +
+      '<div class="product__body">' +
+      '<p class="product__cat">' + esc(catLabel(p.cat)) + '</p>' +
+      '<h3>' + esc(p.name) + '</h3>' +
+      '<p class="product__supplier">' + esc(t('by_supplier')) + ': ' + esc(p.supplier) + '</p>' +
+      '<p class="product__desc">' + esc(p.desc) + '</p>' +
+      '<div class="product__meta"><strong class="price">' + fmtPrice(p.price) + ' <small>/ ' + esc(p.unit) + '</small></strong>' +
+      '<span class="moq">' + esc(t('moq_label')) + ': ' + fmtNum(p.moq) + '</span></div>' +
+      (extraHTML || '') +
+      '<div class="product__actions">' +
+      '<button type="button" class="btn btn--outline btn--sm" data-action="details" data-id="' + esc(p.id) + '">' + esc(t('btn_details')) + '</button>' +
+      '<button type="button" class="btn btn--primary btn--sm" data-action="quote" data-id="' + esc(p.id) + '">' + esc(t('btn_quote')) + '</button>' +
+      '</div></div></article>';
+  }
+
+  function filteredProducts() {
+    var q = state.q.trim().toLowerCase();
+    var list = allProducts().filter(function (p) {
+      if (state.cat && p.cat !== state.cat) return false;
+      if (state.supplier && p.supplier.toLowerCase() !== state.supplier.toLowerCase()) return false;
+      if (q && p.name.toLowerCase().indexOf(q) === -1 && p.desc.toLowerCase().indexOf(q) === -1 &&
+          p.supplier.toLowerCase().indexOf(q) === -1 && catLabel(p.cat).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    if (state.sort === 'low') list.sort(function (a, b) { return a.price - b.price; });
+    if (state.sort === 'high') list.sort(function (a, b) { return b.price - a.price; });
+    return list;
+  }
+
+  function renderSkeleton() {
+    var h = '';
+    for (var i = 0; i < 8; i++) h += '<div class="skeleton" aria-hidden="true"></div>';
+    $('#productGrid').innerHTML = h;
+    $('#productGrid').setAttribute('aria-busy', 'true');
+  }
+
+  function renderProducts() {
+    if (!state.ready) return;
+    var list = filteredProducts();
+    var grid = $('#productGrid');
+    grid.setAttribute('aria-busy', 'false');
+    grid.innerHTML = list.map(function (p) { return productCard(p); }).join('');
+    $('#productsEmpty').hidden = list.length > 0;
+    grid.hidden = list.length === 0;
+    $('#resultsCount').textContent = t('results_count', { n: list.length });
+    var bar = $('#supplierBar');
+    if (state.supplier) {
+      bar.hidden = false;
+      bar.innerHTML = esc(t('supplier_filter', { name: state.supplier })) +
+        ' <button type="button" class="link-btn" id="clearSupplier">×</button>';
+      $('#clearSupplier').setAttribute('aria-label', t('btn_clear'));
+    } else {
+      bar.hidden = true;
+      bar.textContent = '';
+    }
+  }
+
+  function syncFilterInputs() {
+    $('#heroQuery').value = state.q;
+    $('#filterQuery').value = state.q;
+    $('#heroCategory').value = state.cat;
+    $('#filterCategory').value = state.cat;
+    $('#filterSort').value = state.sort;
+  }
+  function clearFilters() {
+    state.q = ''; state.cat = ''; state.sort = 'default'; state.supplier = '';
+    syncFilterInputs();
+    renderProducts();
+  }
+  function scrollToId(id) {
+    var el = document.getElementById(id);
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- rendering: suppliers ---------- */
+  function renderSuppliers() {
+    var prods = allProducts();
+    $('#supplierGrid').innerHTML = D.suppliers.map(function (s) {
+      var n = prods.filter(function (p) { return p.supplier.toLowerCase() === s.name.toLowerCase(); }).length;
+      return '<article class="card supplier">' +
+        '<div class="supplier__avatar" aria-hidden="true">' + esc(s.name.charAt(0)) + '</div>' +
+        '<h3>' + esc(s.name) + '</h3>' +
+        '<p class="supplier__loc">📍 ' + esc(s.city) + '</p>' +
+        '<div class="supplier__cats">' + s.cats.map(function (c) { return '<span>' + esc(catLabel(c)) + '</span>'; }).join('') + '</div>' +
+        '<p class="supplier__desc">' + esc(s.desc) + '</p>' +
+        '<p class="supplier__demo">' + esc(t('supplier_demo_label')) + '. ' + esc(t('supplier_not_verified')) + '</p>' +
+        '<p class="supplier__count">' + esc(t('supplier_products_n', { n: n })) + '</p>' +
+        '<button type="button" class="btn btn--outline btn--sm" data-supplier="' + esc(s.name) + '">' + esc(t('view_products')) + '</button>' +
+        '</article>';
+    }).join('');
+  }
+
+  /* ---------- Smart Match (transparent rules, no AI) ---------- */
+  function evaluate(p, c) {
+    return {
+      cat: !c.cat || p.cat === c.cat,
+      price: p.price <= c.budget,
+      moq: p.moq <= c.qty,
+      stock: p.available >= c.qty
+    };
+  }
+  function reasonsFor(p, c) {
+    var r = [];
+    r.push(c.cat ? t('reason_cat', { cat: catLabel(p.cat) }) : t('reason_any_cat'));
+    r.push(t('reason_price', { price: fmtNum(p.price), budget: fmtNum(c.budget), save: fmtNum(Math.round((c.budget - p.price) * 100) / 100) }));
+    r.push(t('reason_moq', { moq: fmtNum(p.moq), qty: fmtNum(c.qty) }));
+    r.push(t('reason_stock', { avail: fmtNum(p.available), qty: fmtNum(c.qty) }));
+    return r;
+  }
+  function failsFor(p, c, res) {
+    var f = [];
+    if (!res.price) f.push(t('fail_price', { price: fmtNum(p.price), budget: fmtNum(c.budget) }));
+    if (!res.moq) f.push(t('fail_moq', { moq: fmtNum(p.moq), qty: fmtNum(c.qty) }));
+    if (!res.stock) f.push(t('fail_stock', { avail: fmtNum(p.available), qty: fmtNum(c.qty) }));
+    return f;
+  }
+  function runMatch(c) {
+    var matches = [], near = [];
+    allProducts().forEach(function (p) {
+      var r = evaluate(p, c);
+      var failed = ['cat', 'price', 'moq', 'stock'].filter(function (k) { return !r[k]; });
+      if (failed.length === 0) matches.push(p);
+      else if (failed.length === 1 && failed[0] !== 'cat') near.push({ p: p, r: r });
+    });
+    matches.sort(function (a, b) { return a.price - b.price; });
+    near.sort(function (a, b) { return a.p.price - b.p.price; });
+    return { matches: matches, near: near.slice(0, 3) };
+  }
+  function renderMatch() {
+    var box = $('#matchResults');
+    if (!state.match) { box.innerHTML = ''; return; }
+    var c = state.match;
+    var out = runMatch(c);
+    var html = '';
+    if (out.matches.length) {
+      html += '<h3>' + esc(t('match_found', { n: out.matches.length })) + '</h3><div class="product-grid">';
+      out.matches.forEach(function (p) {
+        var extra = '<ul class="reasons"><strong>' + esc(t('why_match')) + '</strong>' +
+          reasonsFor(p, c).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
+        html += productCard(p, extra);
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="match-note"><h3>' + esc(t('match_none_title')) + '</h3><p>' + esc(t('match_none_text')) + '</p></div>';
+    }
+    if (out.near.length) {
+      html += '<h3 style="margin-top:24px">' + esc(t('match_near')) + '</h3><div class="product-grid">';
+      out.near.forEach(function (n) {
+        var extra = '<ul class="reasons reasons--warn"><strong>' + esc(t('why_not')) + '</strong>' +
+          failsFor(n.p, c, n.r).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
+        html += productCard(n.p, extra);
+      });
+      html += '</div>';
+    }
+    box.innerHTML = html;
+  }
+
+  /* ---------- dashboard ---------- */
+  function fmtDate(ts) {
+    var tag = { en: 'en-IN', mr: 'mr-IN', hi: 'hi-IN' }[state.lang] || 'en-IN';
+    try { return new Date(ts).toLocaleString(tag, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return new Date(ts).toLocaleString(); }
+  }
+  function renderDashboard() {
+    var stats = [
+      { k: 'd_total', v: D.products.length },
+      { k: 'd_added', v: state.custom.length },
+      { k: 'd_quotes', v: state.quotes.length },
+      { k: 'd_wish', v: state.wish.length }
+    ];
+    $('#statGrid').innerHTML = stats.map(function (s) {
+      return '<div class="card stat"><span class="stat__value">' + s.v + '</span><span class="stat__label">' + esc(t(s.k)) + '</span></div>';
+    }).join('');
+
+    var ql = $('#quoteList');
+    if (!state.quotes.length) {
+      ql.innerHTML = '<p class="dash-empty">' + esc(t('d_empty_quotes')) + '</p>';
+    } else {
+      ql.innerHTML = '<ul class="dash-list">' + state.quotes.slice().reverse().slice(0, 5).map(function (q) {
+        return '<li><span><strong>' + esc(q.productName) + '</strong> × ' + fmtNum(q.qty) + '<br><small>' + esc(q.buyer) + '</small></span><time>' + esc(fmtDate(q.ts)) + '</time></li>';
+      }).join('') + '</ul>';
+    }
+
+    var al = $('#activityList');
+    if (!state.activity.length) {
+      al.innerHTML = '<p class="dash-empty">' + esc(t('d_empty_activity')) + '</p>';
+    } else {
+      al.innerHTML = '<ul class="dash-list">' + state.activity.slice().reverse().slice(0, 6).map(function (a) {
+        var key = { product: 'act_product', quote: 'act_quote', wish: 'act_wish' }[a.type];
+        return '<li><span>' + esc(t(key, { name: a.name, qty: a.qty })) + '</span><time>' + esc(fmtDate(a.ts)) + '</time></li>';
+      }).join('') + '</ul>';
+    }
+    $('#storageNote').textContent = storageOK ? t('storage_note') : t('storage_unavailable');
+  }
+  function logActivity(type, name, qty) {
+    state.activity.push({ type: type, name: name, qty: qty || 0, ts: Date.now() });
+    if (state.activity.length > 30) state.activity = state.activity.slice(-30);
+    save(KEYS.activity, state.activity);
+  }
+
+  function refreshAll() {
+    renderCategories();
+    renderProducts();
+    renderSuppliers();
+    renderDashboard();
+    renderQuoteProducts();
+    renderMatch();
+  }
+
+  /* ---------- product detail modal ---------- */
+  function openDetail(id) {
+    var p = productById(id);
+    if (!p) return;
+    state.detailId = id;
+    renderDetail();
+    openModal($('#detailModal'));
+  }
+  function renderDetail() {
+    var p = productById(state.detailId);
+    if (!p) return;
+    var c = catById(p.cat) || D.categories[0];
+    var wished = state.wish.indexOf(p.id) !== -1;
+    $('#detailBody').innerHTML =
+      '<div class="detail__art" style="background:linear-gradient(135deg,' + c.from + ',' + c.to + ')" aria-hidden="true">' + (p.emoji || c.emoji) + '</div>' +
+      '<p class="product__cat">' + esc(catLabel(p.cat)) + '</p>' +
+      '<h2 id="detailTitle">' + esc(p.name) + '</h2>' +
+      '<p>' + esc(p.desc) + '</p>' +
+      '<dl class="detail__grid">' +
+      '<div><dt>' + esc(t('f_price')) + '</dt><dd>' + fmtPrice(p.price) + ' / ' + esc(p.unit) + '</dd></div>' +
+      '<div><dt>' + esc(t('moq_label')) + '</dt><dd>' + fmtNum(p.moq) + '</dd></div>' +
+      '<div><dt>' + esc(t('detail_available')) + '</dt><dd>' + fmtNum(p.available) + '</dd></div>' +
+      '<div><dt>' + esc(t('detail_total_moq')) + '</dt><dd>' + fmtPrice(p.price * p.moq) + '</dd></div>' +
+      '<div class="span-2" style="grid-column:1/-1"><dt>' + esc(t('by_supplier')) + '</dt><dd>' + esc(p.supplier) + '</dd></div>' +
+      '</dl>' +
+      '<p class="demo-label">' + esc(t('detail_note')) + '</p>' +
+      '<div class="modal__actions">' +
+      '<button type="button" class="btn btn--primary" data-action="quote" data-id="' + esc(p.id) + '">' + esc(t('btn_quote')) + '</button>' +
+      '<button type="button" class="btn btn--outline" data-action="wish" data-id="' + esc(p.id) + '" aria-pressed="' + wished + '">♥ ' + esc(t(wished ? 'wishlist_remove' : 'wishlist_add')) + '</button>' +
+      '</div>';
+  }
+
+  /* ---------- quote modal ---------- */
+  function openQuote(id) {
+    var form = $('#quoteForm');
+    form.reset();
+    clearErrors(form);
+    form.hidden = false;
+    $('#quoteSuccess').hidden = true;
+    $('#quoteTitle').hidden = false;
+    renderQuoteProducts(id);
+    var p = productById(id);
+    if (p) $('#qQty').value = p.moq;
+    // close any other modal first (e.g. the detail modal), then open this one
+    if (openModalEl && openModalEl !== $('#quoteModal')) {
+      var keep = lastFocus;
+      openModalEl.hidden = true; openModalEl = null;
+      lastFocus = keep;
+    }
+    openModal($('#quoteModal'));
+  }
+
+  $('#quoteForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = e.currentTarget;
+    var buyer = $('#qBuyer'), email = $('#qEmail'), prod = $('#qProduct'), qty = $('#qQty');
+    var ok = true;
+    ok = setErr(buyer, buyer.value.trim().length < 2 ? t('err_required') : '') && ok;
+    ok = setErr(email, !email.value.trim() ? t('err_required') : (!isEmail(email.value.trim()) ? t('err_email') : '')) && ok;
+    var p = productById(prod.value);
+    ok = setErr(prod, p ? '' : t('err_required')) && ok;
+    var n = parseNum(qty.value);
+    var qErr = '';
+    if (isNaN(n) || n <= 0) qErr = t('err_integer');
+    else if (!isWhole(n)) qErr = t('err_integer');
+    else if (p && n < p.moq) qErr = t('err_qty_moq', { moq: fmtNum(p.moq) });
+    ok = setErr(qty, qErr) && ok;
+    if (!ok) { toast(t('err_form'), true); var bad = $('[aria-invalid="true"]', form); if (bad) bad.focus(); return; }
+
+    state.quotes.push({
+      id: 'q' + Date.now(), buyer: buyer.value.trim(), email: email.value.trim(),
+      productId: p.id, productName: p.name, supplier: p.supplier, qty: n,
+      message: $('#qMsg').value.trim(), ts: Date.now()
+    });
+    save(KEYS.quotes, state.quotes);
+    logActivity('quote', p.name, n);
+    renderDashboard();
+    form.hidden = true;
+    $('#quoteTitle').hidden = true;
+    $('#quoteSuccessText').textContent = t('quote_success_text', { qty: fmtNum(n), product: p.name });
+    $('#quoteSuccess').hidden = false;
+    var closeBtn = $('#quoteSuccess button');
+    if (closeBtn) closeBtn.focus();
+  });
+
+  /* ---------- seller form ---------- */
+  var lastAddedId = null;
+  $('#sellForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = e.currentTarget;
+    $('#sellSuccess').hidden = true;
+    var name = $('#pName'), cat = $('#pCategory'), supplier = $('#pSupplier'), price = $('#pPrice'),
+        avail = $('#pAvailable'), moq = $('#pMoq'), desc = $('#pDesc');
+    var ok = true;
+    ok = setErr(name, name.value.trim().length < 2 ? t('err_required') : '') && ok;
+    ok = setErr(cat, cat.value ? '' : t('err_required')) && ok;
+    ok = setErr(supplier, supplier.value.trim().length < 2 ? t('err_required') : '') && ok;
+    var pr = parseNum(price.value);
+    ok = setErr(price, price.value.trim() === '' ? t('err_required') : (isNaN(pr) || pr <= 0 ? t('err_number') : '')) && ok;
+    var av = parseNum(avail.value);
+    ok = setErr(avail, avail.value.trim() === '' ? t('err_required') : (isNaN(av) || av <= 0 || !isWhole(av) ? t('err_integer') : '')) && ok;
+    var mq = parseNum(moq.value);
+    var mqErr = '';
+    if (moq.value.trim() === '') mqErr = t('err_required');
+    else if (isNaN(mq) || mq <= 0 || !isWhole(mq)) mqErr = t('err_integer');
+    else if (!isNaN(av) && av > 0 && mq > av) mqErr = t('err_moq_gt_avail');
+    ok = setErr(moq, mqErr) && ok;
+    ok = setErr(desc, desc.value.trim().length < 5 ? t('err_required') : '') && ok;
+    var formErr = $('#sellFormErr');
+    if (!ok) {
+      formErr.textContent = t('err_form');
+      var bad = $('[aria-invalid="true"]', form); if (bad) bad.focus();
+      return;
+    }
+    formErr.textContent = '';
+    var c = catById(cat.value);
+    var product = {
+      id: 'c' + Date.now(), name: name.value.trim(), cat: cat.value, price: pr, unit: 'unit',
+      moq: mq, available: av, supplier: supplier.value.trim(), desc: desc.value.trim(),
+      emoji: c ? c.emoji : '📦', custom: true
+    };
+    state.custom.push(product);
+    save(KEYS.products, state.custom);
+    logActivity('product', product.name);
+    lastAddedId = product.id;
+    form.reset();
+    clearErrors(form);
+    refreshAll();
+    $('#sellSuccessText').textContent = t('product_added');
+    $('#sellSuccess').hidden = false;
+    toast(t('product_added'));
+  });
+  $('#viewInMarket').addEventListener('click', function () {
+    clearFilters();
+    scrollToId('products');
+  });
+
+  /* ---------- contact form ---------- */
+  $('#contactForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = e.currentTarget;
+    $('#contactSuccess').hidden = true;
+    var n = $('#cName'), em = $('#cEmail'), sub = $('#cSubject'), msg = $('#cMessage');
+    var ok = true;
+    ok = setErr(n, n.value.trim().length < 2 ? t('err_required') : '') && ok;
+    ok = setErr(em, !em.value.trim() ? t('err_required') : (!isEmail(em.value.trim()) ? t('err_email') : '')) && ok;
+    ok = setErr(sub, sub.value.trim().length < 2 ? t('err_required') : '') && ok;
+    ok = setErr(msg, msg.value.trim().length < 5 ? t('err_required') : '') && ok;
+    if (!ok) { var bad = $('[aria-invalid="true"]', form); if (bad) bad.focus(); return; }
+    form.reset();
+    $('#contactSuccess').hidden = false;
+  });
+
+  /* ---------- Smart Match form ---------- */
+  $('#matchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var budget = parseNum($('#matchBudget').value);
+    var qty = parseNum($('#matchQty').value);
+    var err = $('#matchError');
+    if (isNaN(budget) || budget <= 0 || isNaN(qty) || qty <= 0 || !isWhole(qty)) {
+      err.textContent = t('match_invalid');
+      state.match = null;
+      $('#matchResults').innerHTML = '';
+      return;
+    }
+    err.textContent = '';
+    var cfg = { cat: $('#matchCategory').value, budget: budget, qty: qty };
+    var box = $('#matchResults');
+    box.innerHTML = '<p class="match-loading"><span class="spinner"></span>' + esc(t('match_loading')) + '</p>';
+    setTimeout(function () {
+      state.match = cfg;
+      renderMatch();
+    }, 350);
+  });
+
+  /* ---------- wishlist ---------- */
+  function toggleWish(id) {
+    var p = productById(id);
+    if (!p) return;
+    var i = state.wish.indexOf(id);
+    if (i === -1) {
+      state.wish.push(id);
+      logActivity('wish', p.name);
+      toast(t('wish_added'));
+    } else {
+      state.wish.splice(i, 1);
+      toast(t('wish_removed'));
+    }
+    save(KEYS.wish, state.wish);
+    renderProducts();
+    renderMatch();
+    renderDashboard();
+    if (openModalEl === $('#detailModal')) renderDetail();
+  }
+
+  /* ---------- reset demo data ---------- */
+  $('#resetData').addEventListener('click', function () {
+    if (!window.confirm(t('d_confirm'))) return;
+    state.custom = []; state.quotes = []; state.activity = []; state.wish = [];
+    state.match = null;
+    save(KEYS.products, []); save(KEYS.quotes, []); save(KEYS.activity, []); save(KEYS.wish, []);
+    if (state.supplier && !D.suppliers.some(function (s) { return s.name === state.supplier; })) state.supplier = '';
+    $('#matchResults').innerHTML = '';
+    refreshAll();
+    toast(t('d_cleared'));
+  });
+
+  /* ---------- click delegation ---------- */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-action],[data-cat],[data-supplier],#clearSupplier');
+    if (!el) return;
+    if (el.id === 'clearSupplier') { state.supplier = ''; renderProducts(); return; }
+    if (el.dataset.cat !== undefined && el.classList.contains('cat-card')) {
+      state.cat = el.dataset.cat; state.q = ''; state.supplier = '';
+      syncFilterInputs(); renderProducts(); scrollToId('products');
+      return;
+    }
+    if (el.dataset.supplier) {
+      state.supplier = el.dataset.supplier; state.cat = ''; state.q = '';
+      syncFilterInputs(); renderProducts(); scrollToId('products');
+      return;
+    }
+    var action = el.dataset.action, id = el.dataset.id;
+    if (action === 'details') openDetail(id);
+    else if (action === 'quote') openQuote(id);
+    else if (action === 'wish') toggleWish(id);
+  });
+
+  /* ---------- filters and hero search ---------- */
+  $('#filterQuery').addEventListener('input', function (e) { state.q = e.target.value; $('#heroQuery').value = state.q; renderProducts(); });
+  $('#filterCategory').addEventListener('change', function (e) { state.cat = e.target.value; $('#heroCategory').value = state.cat; renderProducts(); });
+  $('#filterSort').addEventListener('change', function (e) { state.sort = e.target.value; renderProducts(); });
+  $('#clearFilters').addEventListener('click', clearFilters);
+  $('#emptyClear').addEventListener('click', clearFilters);
+  $('#heroSearch').addEventListener('submit', function (e) {
+    e.preventDefault();
+    state.q = $('#heroQuery').value;
+    state.cat = $('#heroCategory').value;
+    state.supplier = '';
+    syncFilterInputs();
+    renderProducts();
+    scrollToId('products');
+  });
+
+  /* ---------- header: mobile menu, login/join, scroll spy ---------- */
+  var nav = $('#siteNav'), toggle = $('#navToggle');
+  function setMenu(open) {
+    nav.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', function () { setMenu(!nav.classList.contains('open')); });
+  $$('.nav-links a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !openModalEl) setMenu(false); });
+  function openAccount() { setMenu(false); openModal($('#accountModal')); }
+  $('#loginBtn').addEventListener('click', openAccount);
+  $('#joinBtn').addEventListener('click', openAccount);
+
+  var navLinks = $$('.nav-links a');
+  function onScroll() {
+    $('#backTop').hidden = window.scrollY < 600;
+    var current = '';
+    ['home', 'categories', 'products', 'suppliers', 'smart-match', 'sell', 'dashboard', 'how-it-works', 'about', 'contact', 'privacy', 'terms'].forEach(function (id) {
+      var s = document.getElementById(id);
+      if (s && s.getBoundingClientRect().top <= 120) current = id;
+    });
+    navLinks.forEach(function (a) { a.classList.toggle('is-active', a.getAttribute('href') === '#' + current); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  $('#backTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ---------- language ---------- */
+  function applyStatic() {
+    document.documentElement.lang = state.lang;
+    document.title = t('doc_title');
+    $$('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    $$('[data-i18n-ph]').forEach(function (el) { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+    $$('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
+    $('#copyright').textContent = t('foot_copyright', { year: new Date().getFullYear() });
+    $$('.js-lang').forEach(function (s) { s.value = state.lang; });
+  }
+  function setLang(lang) {
+    if (!I18N[lang]) return;
+    state.lang = lang;
+    save(KEYS.lang, lang);
+    applyStatic();
+    renderSelects();
+    refreshAll();
+    $$('form').forEach(clearErrors);
+    $('#matchError').textContent = '';
+    if (openModalEl === $('#detailModal')) renderDetail();
+    if (!$('#quoteSuccess').hidden) {
+      // keep the success text in sync with the language
+      var last = state.quotes[state.quotes.length - 1];
+      if (last) $('#quoteSuccessText').textContent = t('quote_success_text', { qty: fmtNum(last.qty), product: last.productName });
+    }
+    if (!$('#sellSuccess').hidden) $('#sellSuccessText').textContent = t('product_added');
+  }
+  $$('.js-lang').forEach(function (s) { s.addEventListener('change', function (e) { setLang(e.target.value); }); });
+
+  /* ---------- init ---------- */
+  applyStatic();
+  renderSelects();
+  renderCategories();
+  renderSuppliers();
+  renderDashboard();
+  renderQuoteProducts();
+  renderSkeleton();
+  onScroll();
+  setTimeout(function () { state.ready = true; renderProducts(); }, 450);
+
+  // tiny test hook so automated checks can inspect state (read-only helpers)
+  window.__restock = {
+    state: state, t: t, runMatch: runMatch, filteredProducts: filteredProducts, setLang: setLang,
+    isReady: function () { return state.ready; }
+  };
+})();
+
+</script>
+<script>
+/* ====== SUPABASE CONFIG: paste your project values (Project Settings > API). Leave empty for local demo mode. ====== */
+window.RESTOCK_SUPABASE = { url: '', key: '' };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ReStock B2B layer: auth, wholesale tiers, MOQ, bulk orders, quotes. Supabase when configured, local demo mode otherwise. */
+(function () {
+'use strict';
+var CFG = window.RESTOCK_SUPABASE || {}, R = window.__restock, S = R.state, D = window.RESTOCK_DATA, I = window.RESTOCK_I18N;
+var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+var n2 = function (n) { return Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }, rs = function (n) { return '₹' + n2(n); };
+var T = function (k, p) { return R.t(k, p); };
+var sb = null, live = false, user = null, cart = [];
+if (CFG.url && CFG.key && window.supabase) { sb = window.supabase.createClient(CFG.url, CFG.key); live = true; }
+function L(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function W(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
+function toast(m, err) { var el = $('#toast'); el.textContent = m; el.classList.toggle('error', !!err); el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 3200); }
+function show(id) { $('#' + id).hidden = false; document.body.classList.add('modal-open'); var f = $('input,select,button:not(.modal__close)', $('#' + id)); if (f) setTimeout(function () { f.focus(); }, 30); }
+function hide() { $$('.modal').forEach(function (m) { if (m.id === 'authModal' || m.id === 'bulkModal') m.hidden = true; }); document.body.classList.remove('modal-open'); }
+
+/* ---------- i18n additions (en complete; hi/mr cover key labels, others fall back to English) ---------- */
+var en = { b_login: 'Login', b_join: 'Join Free', b_logout: 'Log out', role_buyer: 'Buyer', role_supplier: 'Supplier', nav_dash: 'Dashboard',
+  a_title_in: 'Log in to ReStock', a_title_up: 'Create your account', a_name: 'Business name', a_email: 'Email', a_pass: 'Password (min 6 characters)', a_role: 'I am a',
+  a_in: 'Log in', a_up: 'Sign up', a_to_up: 'New here? Create an account', a_to_in: 'Already registered? Log in',
+  a_confirm: 'Check your email to confirm your account, then log in.', a_demo: 'Demo mode: Supabase is not configured, so accounts and data stay in this browser.', a_live: 'Live mode: connected to Supabase.',
+  a_bad: 'Enter a valid email, a business name and a password of 6+ characters.',
+  b_need_buyer: 'Please log in as a Buyer first.', b_need_supplier: 'Please log in as a Supplier first.',
+  b_bulk: 'Bulk', b_bulk_from: 'Wholesale from ₹{price} at {qty}+ units', b_tiers: 'Wholesale price tiers', b_tq: 'Quantity', b_tp: 'Price / unit', b_add: 'Add to bulk order',
+  c_title: 'Bulk order', c_empty: 'Your bulk order is empty. Use “+ Bulk” on any product.', c_total: 'Order total', c_notes: 'Delivery notes (optional)', c_place: 'Place bulk order', c_placed: 'Bulk order placed!',
+  c_moq: '{name}: minimum order is {moq}', c_stock: '{name}: only {avail} in stock', c_added: 'Added to bulk order', c_line: 'Line total',
+  p_title: 'My B2B Dashboard', p_sub: 'Quotations, bulk orders and listings for your account.', p_cta: 'Log in as a Buyer or Supplier to manage quotes and bulk orders.',
+  p_quotes: 'Quotations', p_orders: 'Bulk orders', p_products: 'My products', p_none: 'Nothing here yet.', p_qty: 'Qty', p_product: 'Product', p_party: 'Buyer / Supplier',
+  p_price: 'Quoted ₹/unit', p_status: 'Status', p_act: 'Actions', p_note: 'Note', p_send: 'Send quote', p_reject: 'Reject', p_accept: 'Accept & order', p_cancel: 'Cancel', p_total: 'Total',
+  p_del: 'Delete', p_ok: 'Updated', p_stat_q: 'Quotations', p_stat_p: 'Awaiting action', p_stat_o: 'Bulk orders', p_stat_v: 'Order value', p_items: 'Items', p_sell_hint: 'Add products with the “Sell on ReStock” form below.',
+  st_pending: 'Pending', st_quoted: 'Quoted', st_accepted: 'Accepted', st_rejected: 'Rejected', st_cancelled: 'Cancelled', st_placed: 'Placed', st_confirmed: 'Confirmed', st_shipped: 'Shipped', st_delivered: 'Delivered' };
+var hi = { b_login: 'लॉगिन', b_join: 'मुफ़्त जुड़ें', b_logout: 'लॉग आउट', role_buyer: 'खरीदार', role_supplier: 'आपूर्तिकर्ता', nav_dash: 'डैशबोर्ड', b_bulk: 'थोक', c_title: 'थोक ऑर्डर', p_title: 'मेरा B2B डैशबोर्ड', p_quotes: 'कोटेशन', p_orders: 'थोक ऑर्डर', a_email: 'ईमेल', a_in: 'लॉगिन', a_up: 'साइन अप', st_pending: 'लंबित', st_quoted: 'कोट किया', st_accepted: 'स्वीकृत', st_rejected: 'अस्वीकृत', st_cancelled: 'रद्द' };
+var mr = { b_login: 'लॉगिन', b_join: 'मोफत सामील व्हा', b_logout: 'लॉग आउट', role_buyer: 'खरेदीदार', role_supplier: 'पुरवठादार', nav_dash: 'डॅशबोर्ड', b_bulk: 'घाऊक', c_title: 'घाऊक ऑर्डर', p_title: 'माझा B2B डॅशबोर्ड', p_quotes: 'कोटेशन', p_orders: 'घाऊक ऑर्डर', a_email: 'ईमेल', a_in: 'लॉगिन', a_up: 'साइन अप', st_pending: 'प्रलंबित', st_quoted: 'कोट केले', st_accepted: 'मंजूर', st_rejected: 'नाकारले', st_cancelled: 'रद्द' };
+Object.assign(I.en, en); Object.assign(I.hi, hi); Object.assign(I.mr, mr);
+
+/* ---------- wholesale tiers & MOQ ---------- */
+function tiers(p) { if (p.tiers && p.tiers.length) return p.tiers; return [[1, 1], [2, .95], [5, .9], [10, .85]].map(function (a) { return { q: p.moq * a[0], price: Math.round(p.price * a[1] * 100) / 100 }; }); }
+function unit(p, q) { var u = p.price; tiers(p).forEach(function (t) { if (q >= t.q) u = t.price; }); return u; }
+function prod(id) { return D.products.concat(S.custom).filter(function (p) { return p.id === id; })[0]; }
+function mapP(r) { return { id: r.id, name: r.name, cat: r.category, price: +r.base_price, unit: r.unit, moq: r.moq, available: r.stock, supplier: r.supplier_name, desc: r.description, emoji: r.emoji, tiers: (r.tiers || []).map(function (t) { return { q: +t.q, price: +t.price }; }), sid: r.supplier_id, custom: !r.is_sample }; }
+
+/* ---------- data layer (Supabase or local) ---------- */
+var uid = function () { return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+var RB = {
+  products: async function () { var r = await sb.from('products').select('*').order('created_at', { ascending: false }); if (r.error) throw r.error; return r.data.map(mapP); },
+  saveProduct: async function (p) {
+    if (!live) return;
+    var r = await sb.from('products').insert({ supplier_id: user.id, supplier_name: user.name, name: p.name, category: p.cat, description: p.desc, unit: p.unit, base_price: p.price, moq: p.moq, stock: p.available, emoji: p.emoji });
+    if (r.error) throw r.error;
+  },
+  myProducts: async function () { return live ? (await RB.products()).filter(function (p) { return p.sid === user.id; }) : S.custom.filter(function (p) { return p.supplier === user.name; }); },
+  delProduct: async function (id) {
+    if (live) { var r = await sb.from('products').delete().eq('id', id); if (r.error) throw r.error; }
+    else { S.custom = S.custom.filter(function (p) { return p.id !== id; }); W('restock_custom_products', S.custom); }
+  },
+  createQuote: async function (q) {
+    var p = prod(q.productId);
+    if (live) {
+      var r = await sb.from('quotes').insert({ buyer_id: user.id, buyer_name: user.name, supplier_id: p.sid || null, product_id: p.id, product_name: p.name, supplier_name: p.supplier, qty: q.qty, message: q.message });
+      if (r.error) throw r.error;
+    } else { var a = L('rs_q', []); a.unshift({ id: uid(), buyer_name: user.name, buyer_email: user.email, supplier_name: p.supplier, product_id: p.id, product_name: p.name, qty: q.qty, message: q.message, status: 'pending', quoted_price: null, supplier_note: '' }); W('rs_q', a); }
+  },
+  quotes: async function () {
+    if (live) { var r = await sb.from('quotes').select('*').order('created_at', { ascending: false }); if (r.error) throw r.error; return r.data; }
+    return L('rs_q', []).filter(function (q) { return user.role === 'buyer' ? q.buyer_email === user.email : q.supplier_name === user.name; });
+  },
+  patchQuote: async function (id, patch) {
+    if (live) { var r = await sb.from('quotes').update(patch).eq('id', id); if (r.error) throw r.error; return; }
+    var a = L('rs_q', []); a.forEach(function (q) { if (q.id === id) Object.assign(q, patch); }); W('rs_q', a);
+  },
+  acceptQuote: async function (id) {
+    if (live) { var r = await sb.rpc('accept_quote', { qid: id }); if (r.error) throw r.error; return; }
+    var q = L('rs_q', []).filter(function (x) { return x.id === id; })[0];
+    localOrder(q.supplier_name, [{ product_name: q.product_name, qty: q.qty, unit_price: q.quoted_price }], 'Quote ' + id);
+    await RB.patchQuote(id, { status: 'accepted' });
+  },
+  placeOrder: async function (items, notes) {
+    if (live) { var r = await sb.rpc('place_bulk_order', { items: items.map(function (i) { return { product_id: i.id, qty: i.qty }; }), notes: notes }); if (r.error) throw r.error; return; }
+    var by = {}; items.forEach(function (i) { var p = prod(i.id); (by[p.supplier] = by[p.supplier] || []).push({ product_name: p.name, qty: i.qty, unit_price: unit(p, i.qty) }); });
+    Object.keys(by).forEach(function (s) { localOrder(s, by[s], notes); });
+  },
+  orders: async function () {
+    if (live) { var r = await sb.from('orders').select('*, order_items(*)').order('created_at', { ascending: false }); if (r.error) throw r.error; return r.data; }
+    return L('rs_o', []).filter(function (o) { return user.role === 'buyer' ? o.buyer_email === user.email : o.supplier_name === user.name; });
+  },
+  setOrder: async function (id, status) {
+    if (live) { var r = await sb.from('orders').update({ status: status }).eq('id', id); if (r.error) throw r.error; return; }
+    var a = L('rs_o', []); a.forEach(function (o) { if (o.id === id) o.status = status; }); W('rs_o', a);
+  }
+};
+function localOrder(supplier, items, notes) {
+  var a = L('rs_o', []), tot = items.reduce(function (s, i) { return s + i.qty * i.unit_price; }, 0);
+  a.unshift({ id: uid(), buyer_name: user.name, buyer_email: user.email, supplier_name: supplier, status: 'placed', total: tot, notes: notes, order_items: items }); W('rs_o', a);
+}
+async function reloadCatalog() {
+  if (!live) return;
+  try { D.products = await RB.products(); S.custom = []; try { localStorage.removeItem('restock_custom_products'); } catch (e) { /* ignore */ } R.setLang(S.lang); decorate(); }
+  catch (e) { toast(e.message, true); }
+}
+
+/* ---------- auth ---------- */
+var authMode = 'in';
+function setAuthMode(m) {
+  authMode = m;
+  $('#authTitle').textContent = T(m === 'in' ? 'a_title_in' : 'a_title_up');
+  $('#authSubmit').textContent = T(m === 'in' ? 'a_in' : 'a_up');
+  $('#authSwitch').textContent = T(m === 'in' ? 'a_to_up' : 'a_to_in');
+  $('#authMode').textContent = T(live ? 'a_live' : 'a_demo');
+  $$('.a-up,.a-role').forEach(function (el) { el.hidden = live && m === 'in'; });
+  $('.a-pw').hidden = !live; $('#authErr').textContent = '';
+}
+function openAuth(m) { setAuthMode(m); show('authModal'); }
+async function refreshUser() {
+  if (live) {
+    var s = (await sb.auth.getSession()).data.session;
+    if (!s) user = null;
+    else { var p = (await sb.from('profiles').select('*').eq('id', s.user.id).single()).data || {}; user = { id: s.user.id, email: s.user.email, role: p.role || 'buyer', name: p.business_name || s.user.email }; }
+  } else user = L('rs_user', null);
+  afterAuth();
+}
+function afterAuth() {
+  $('#loginBtn').textContent = user ? user.name + ' · ' + T('role_' + user.role) : T('b_login');
+  $('#joinBtn').textContent = user ? T('b_logout') : T('b_join');
+  var ps = $('#pSupplier'); if (ps) { ps.readOnly = !!(user && user.role === 'supplier'); if (ps.readOnly) ps.value = user.name; }
+  renderPanel(); renderCart();
+}
+$('#authForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var f = { name: $('#aName').value.trim(), email: $('#aEmail').value.trim(), pass: $('#aPass').value, role: $('#aRole').value }, err = $('#authErr');
+  var needName = authMode === 'up' || !live;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email) || (needName && f.name.length < 2) || (live && f.pass.length < 6)) { err.textContent = T('a_bad'); return; }
+  try {
+    if (live) {
+      var r = authMode === 'up' ? await sb.auth.signUp({ email: f.email, password: f.pass, options: { data: { role: f.role, business_name: f.name } } }) : await sb.auth.signInWithPassword({ email: f.email, password: f.pass });
+      if (r.error) throw r.error;
+      if (!r.data.session) { err.textContent = T('a_confirm'); return; }
+    } else W('rs_user', { id: f.email, email: f.email, role: f.role, name: f.name });
+    await refreshUser(); await reloadCatalog(); hide(); $('#authForm').reset();
+    toast(T('b_login') + ' ✓'); document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
+  } catch (x) { err.textContent = x.message; }
+});
+$('#authSwitch').addEventListener('click', function () { setAuthMode(authMode === 'in' ? 'up' : 'in'); });
+async function logout() { if (live) await sb.auth.signOut(); else localStorage.removeItem('rs_user'); user = null; cart = []; saveCart(); afterAuth(); toast(T('b_logout') + ' ✓'); }
+/* take over the header buttons before the original handlers */
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('#loginBtn,#joinBtn'); if (!b) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  if (user) { if (b.id === 'joinBtn') logout(); else document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' }); } else openAuth(b.id === 'joinBtn' ? 'up' : 'in');
+}, true);
+['loginBtn', 'joinBtn'].forEach(function (id) { $('#' + id).removeAttribute('data-i18n'); });
+document.addEventListener('click', function (e) { if (e.target.closest('[data-b2bclose]')) hide(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+
+/* ---------- gate + sync the original quote / sell forms ---------- */
+var before = 0;
+document.addEventListener('submit', function (e) {
+  if (e.target.id === 'quoteForm' && (!user || user.role !== 'buyer')) { e.preventDefault(); e.stopImmediatePropagation(); toast(T('b_need_buyer'), true); openAuth('in'); }
+  if (e.target.id === 'sellForm') {
+    if (!user || user.role !== 'supplier') { e.preventDefault(); e.stopImmediatePropagation(); toast(T('b_need_supplier'), true); openAuth('in'); }
+    else before = S.custom.length;
+  }
+}, true);
+document.addEventListener('submit', async function (e) {
+  try {
+    if (e.target.id === 'quoteForm' && !$('#quoteSuccess').hidden) { await RB.createQuote(S.quotes[S.quotes.length - 1]); renderPanel(); }
+    if (e.target.id === 'sellForm' && S.custom.length > before) { await RB.saveProduct(S.custom[S.custom.length - 1]); await reloadCatalog(); renderPanel(); }
+  } catch (x) { toast(x.message, true); }
+});
+new MutationObserver(function () {
+  var m = $('#quoteModal'); if (!m.hidden && user) { $('#qBuyer').value = user.name; $('#qEmail').value = user.email; }
+}).observe($('#quoteModal'), { attributes: true, attributeFilter: ['hidden'] });
+
+/* ---------- product card / detail decoration ---------- */
+function decorate() {
+  $$('.product:not([data-b2b])').forEach(function (c) {
+    c.setAttribute('data-b2b', 1); var p = prod(c.dataset.id); if (!p) return;
+    var ts = tiers(p), lo = ts[ts.length - 1], m = $('.product__meta', c), a = $('.product__actions', c);
+    if (m) m.insertAdjacentHTML('afterend', '<p class="bulk-line">' + esc(T('b_bulk_from', { price: n2(lo.price), qty: n2(lo.q) })) + '</p>');
+    if (a) a.insertAdjacentHTML('beforeend', '<button type="button" class="btn btn--teal btn--sm" data-bulk="' + esc(p.id) + '">+ ' + esc(T('b_bulk')) + '</button>');
+    reveal(c);
+  });
+}
+new MutationObserver(decorate).observe(document.body, { childList: true, subtree: true });
+new MutationObserver(function () {
+  var b = $('#detailBody'), pid = b && $('[data-action="quote"]', b); if (!pid || $('.tier-table', b)) return;
+  var p = prod(pid.dataset.id); if (!p) return;
+  var h = '<h3>' + esc(T('b_tiers')) + '</h3><table class="tier-table"><tr><th>' + esc(T('b_tq')) + '</th><th>' + esc(T('b_tp')) + '</th></tr>' +
+    tiers(p).map(function (t) { return '<tr><td>' + n2(t.q) + '+</td><td>' + rs(t.price) + '</td></tr>'; }).join('') + '</table>' +
+    '<button type="button" class="btn btn--teal" data-bulk="' + esc(p.id) + '">+ ' + esc(T('b_add')) + '</button>';
+  $('.demo-label', b).insertAdjacentHTML('beforebegin', h);
+}).observe($('#detailBody'), { childList: true });
+
+/* ---------- bulk cart ---------- */
+cart = L('rs_cart', []);
+function saveCart() { W('rs_cart', cart); }
+function addBulk(id) {
+  var p = prod(id); if (!p) return;
+  var c = cart.filter(function (x) { return x.id === id; })[0];
+  if (c) c.qty += p.moq; else cart.push({ id: id, qty: p.moq });
+  saveCart(); renderCart(); toast(T('c_added'));
+}
+function renderCart() {
+  cart = cart.filter(function (c) { return prod(c.id); });
+  var fab = $('#bulkFab'); fab.hidden = !cart.length; $('#bulkCount').textContent = cart.length;
+  if ($('#bulkModal').hidden) return;
+  var tot = 0, h = '';
+  if (!cart.length) h = '<p class="dash-empty">' + esc(T('c_empty')) + '</p>';
+  else {
+    cart.forEach(function (c) {
+      var p = prod(c.id), u = unit(p, c.qty), lt = u * c.qty; tot += lt;
+      h += '<div class="bulk-row"><div><strong>' + esc(p.name) + '</strong><small>' + esc(p.supplier) + ' · MOQ ' + n2(p.moq) + ' · ' + rs(u) + '/' + esc(p.unit) + '</small></div>' +
+        '<input type="number" min="' + p.moq + '" step="1" value="' + c.qty + '" data-qty="' + esc(c.id) + '" aria-label="' + esc(T('p_qty')) + '"><strong class="lt">' + rs(lt) + '</strong>' +
+        '<button class="link-btn" data-rm="' + esc(c.id) + '" aria-label="Remove">✕</button></div>';
+    });
+    h += '<div class="bulk-total"><span>' + esc(T('c_total')) + '</span><span>' + rs(tot) + '</span></div>' +
+      '<div class="field"><label for="bNotes">' + esc(T('c_notes')) + '</label><textarea id="bNotes" rows="2" maxlength="300"></textarea></div>' +
+      '<p class="field-error" id="bErr" role="alert"></p><button class="btn btn--primary" id="bPlace" type="button">' + esc(T('c_place')) + '</button>';
+  }
+  $('#bulkBody').innerHTML = h;
+}
+$('#bulkFab').addEventListener('click', function () { show('bulkModal'); renderCart(); });
+document.addEventListener('click', async function (e) {
+  var el = e.target.closest('[data-bulk],[data-rm],[data-auth],[data-act],#bPlace'); if (!el) return;
+  try {
+    if (el.dataset.bulk) addBulk(el.dataset.bulk);
+    else if (el.dataset.rm) { cart = cart.filter(function (c) { return c.id !== el.dataset.rm; }); saveCart(); renderCart(); }
+    else if (el.dataset.auth) openAuth(el.dataset.auth);
+    else if (el.id === 'bPlace') await place();
+    else if (el.dataset.act) await panelAct(el);
+  } catch (x) { toast(x.message, true); }
+});
+document.addEventListener('change', function (e) {
+  var q = e.target.dataset && e.target.dataset.qty;
+  if (q) { var c = cart.filter(function (x) { return x.id === q; })[0]; c.qty = Math.max(1, Math.floor(+e.target.value) || 1); saveCart(); renderCart(); }
+  if (e.target.dataset && e.target.dataset.ost) RB.setOrder(e.target.dataset.ost, e.target.value).then(function () { toast(T('p_ok')); renderPanel(); }).catch(function (x) { toast(x.message, true); });
+});
+async function place() {
+  if (!user || user.role !== 'buyer') { hide(); toast(T('b_need_buyer'), true); openAuth('in'); return; }
+  var err = '';
+  cart.forEach(function (c) { var p = prod(c.id); if (c.qty < p.moq) err = err || T('c_moq', { name: p.name, moq: p.moq }); else if (c.qty > p.available) err = err || T('c_stock', { name: p.name, avail: p.available }); });
+  if (err) { $('#bErr').textContent = err; return; }
+  await RB.placeOrder(cart, $('#bNotes').value.trim());
+  cart = []; saveCart(); hide(); renderCart(); await reloadCatalog(); await renderPanel();
+  toast(T('c_placed')); document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ---------- dashboard: quotation + order management ---------- */
+var st = function (s) { return '<span class="st st-' + s + '">' + esc(T('st_' + s)) + '</span>'; };
+async function panelAct(el) {
+  var a = el.dataset.act, row = el.closest('tr'), id = el.dataset.id;
+  if (a === 'accept') await RB.acceptQuote(id);
+  else if (a === 'cancel') await RB.patchQuote(id, { status: 'cancelled' });
+  else if (a === 'reject') await RB.patchQuote(id, { status: 'rejected' });
+  else if (a === 'send') {
+    var price = +$('.q-price', row).value; if (!(price > 0)) { toast(T('p_price'), true); return; }
+    await RB.patchQuote(id, { status: 'quoted', quoted_price: price, supplier_note: $('.q-note', row).value.trim() });
+  } else if (a === 'del') { await RB.delProduct(id); await reloadCatalog(); }
+  toast(T('p_ok')); await renderPanel();
+}
+async function renderPanel() {
+  var el = $('#b2bPanel'), mode = '<span class="badge">' + (live ? 'Live · Supabase' : 'Demo mode · local') + '</span>';
+  if (!user) { el.innerHTML = '<div class="card p-cta"><p>' + esc(T('p_cta')) + '</p><button class="btn btn--primary" data-auth="in">' + esc(T('b_login')) + '</button> <button class="btn btn--outline" data-auth="up">' + esc(T('b_join')) + '</button> ' + mode + '</div>'; return; }
+  var buyer = user.role === 'buyer', qs, os, ps = [];
+  try { qs = await RB.quotes(); os = await RB.orders(); if (!buyer) ps = await RB.myProducts(); } catch (x) { el.innerHTML = '<p class="field-error">' + esc(x.message) + '</p>'; return; }
+  var val = os.reduce(function (s, o) { return s + Number(o.total || 0); }, 0), wait = qs.filter(function (q) { return buyer ? q.status === 'quoted' : q.status === 'pending'; }).length;
+  var stats = [[T('p_stat_q'), qs.length], [T('p_stat_p'), wait], [T('p_stat_o'), os.length], [T('p_stat_v'), val, '₹']];
+  var h = '<div class="p-head"><h3 style="margin:0">' + esc(user.name) + '</h3><span class="badge">' + esc(T('role_' + user.role)) + '</span>' + mode + '</div><div class="stat-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">' +
+    stats.map(function (s) { return '<div class="card stat"><span class="stat__value" data-count="' + s[1] + '">' + (s[2] || '') + s[1] + '</span><span class="stat__label">' + esc(s[0]) + '</span></div>'; }).join('') + '</div>';
+  h += '<h3 class="p-h3">' + esc(T('p_quotes')) + '</h3>';
+  h += qs.length ? '<div class="tbl"><table><tr><th>' + [T('p_product'), T('p_party'), T('p_qty'), T('p_price'), T('p_status'), T('p_act')].map(esc).join('</th><th>') + '</th></tr>' + qs.map(function (q) {
+    var act = '';
+    if (buyer) { if (q.status === 'quoted') act += '<button class="btn btn--teal btn--sm" data-act="accept" data-id="' + q.id + '">' + esc(T('p_accept')) + '</button>'; if (q.status === 'pending' || q.status === 'quoted') act += '<button class="btn btn--outline btn--sm" data-act="cancel" data-id="' + q.id + '">' + esc(T('p_cancel')) + '</button>'; }
+    else if (q.status === 'pending' || q.status === 'quoted') act = '<input class="mini q-price" type="number" min="0" step="any" placeholder="₹" value="' + esc(q.quoted_price || '') + '"><input class="mini wide q-note" placeholder="' + esc(T('p_note')) + '" maxlength="120"><button class="btn btn--primary btn--sm" data-act="send" data-id="' + q.id + '">' + esc(T('p_send')) + '</button><button class="btn btn--outline btn--sm" data-act="reject" data-id="' + q.id + '">' + esc(T('p_reject')) + '</button>';
+    return '<tr><td>' + esc(q.product_name) + (q.message ? '<br><small>' + esc(q.message) + '</small>' : '') + '</td><td>' + esc(buyer ? q.supplier_name : q.buyer_name) + '</td><td>' + n2(q.qty) + '</td><td>' + (q.quoted_price ? rs(q.quoted_price) + (q.supplier_note ? '<br><small>' + esc(q.supplier_note) + '</small>' : '') : '—') + '</td><td>' + st(q.status) + '</td><td class="acts">' + act + '</td></tr>';
+  }).join('') + '</table></div>' : '<p class="dash-empty">' + esc(T('p_none')) + '</p>';
+  h += '<h3 class="p-h3">' + esc(T('p_orders')) + '</h3>';
+  h += os.length ? '<div class="tbl"><table><tr><th>' + [T('p_party'), T('p_items'), T('p_total'), T('p_status')].map(esc).join('</th><th>') + '</th></tr>' + os.map(function (o) {
+    var its = (o.order_items || []).map(function (i) { return esc(i.product_name) + ' × ' + n2(i.qty) + ' @ ' + rs(i.unit_price); }).join('<br>');
+    var s = buyer ? st(o.status) : '<select data-ost="' + o.id + '">' + ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'].map(function (x) { return '<option value="' + x + '"' + (x === o.status ? ' selected' : '') + '>' + esc(T('st_' + x)) + '</option>'; }).join('') + '</select>';
+    return '<tr><td>' + esc(buyer ? o.supplier_name : o.buyer_name) + '</td><td>' + its + '</td><td><strong>' + rs(o.total) + '</strong></td><td>' + s + '</td></tr>';
+  }).join('') + '</table></div>' : '<p class="dash-empty">' + esc(T('p_none')) + '</p>';
+  if (!buyer) {
+    h += '<h3 class="p-h3">' + esc(T('p_products')) + '</h3><p class="hint">' + esc(T('p_sell_hint')) + '</p>';
+    h += ps.length ? '<div class="tbl"><table><tr><th>' + [T('p_product'), T('p_price'), 'MOQ', 'Stock', T('p_act')].map(esc).join('</th><th>') + '</th></tr>' + ps.map(function (p) {
+      return '<tr><td>' + esc(p.name) + '</td><td>' + rs(p.price) + '</td><td>' + n2(p.moq) + '</td><td>' + n2(p.available) + '</td><td><button class="btn btn--outline btn--sm" data-act="del" data-id="' + esc(p.id) + '">' + esc(T('p_del')) + '</button></td></tr>';
+    }).join('') + '</table></div>' : '<p class="dash-empty">' + esc(T('p_none')) + '</p>';
+  }
+  el.innerHTML = h; countUp(el);
+}
+function countUp(root) {
+  $$('[data-count]', root).forEach(function (n) {
+    var to = +n.dataset.count, pre = n.textContent.charAt(0) === '₹' ? '₹' : '', t0 = performance.now();
+    (function f(t) { var k = Math.min(1, (t - t0) / 900); n.textContent = pre + n2(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(f); })(t0);
+  });
+}
+
+/* ---------- motion: scroll reveal + progress bar ---------- */
+var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: .12 }) : null;
+function reveal(el, i) { if (!io) return; el.classList.add('reveal'); el.style.setProperty('--d', ((i || 0) % 6) * .07 + 's'); io.observe(el); }
+$$('.section__head,.cat-card,.supplier,.step,.value,.for-sellers,.form-card,.stat,.hero__copy').forEach(reveal);
+new MutationObserver(function () { $$('.cat-card:not(.reveal),.supplier:not(.reveal)').forEach(reveal); }).observe(document.body, { childList: true, subtree: true });
+window.addEventListener('scroll', function () { var h = document.documentElement; $('#progress').style.transform = 'scaleX(' + (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)) + ')'; }, { passive: true });
+
+/* ---------- init ---------- */
+var navUl = $('.nav-links'); if (navUl) navUl.insertAdjacentHTML('beforeend', '<li><a href="#dashboard" data-i18n="nav_dash">Dashboard</a></li>');
+$('#dashTitle').setAttribute('data-i18n', 'p_title'); $('[data-i18n="dash_sub"]').setAttribute('data-i18n', 'p_sub');
+$$('.js-lang').forEach(function (s) { s.addEventListener('change', function () { setTimeout(function () { setAuthMode(authMode); afterAuth(); decorate(); }, 0); }); });
+R.setLang(S.lang);
+refreshUser().then(reloadCatalog).then(decorate);
+if (live) sb.auth.onAuthStateChange(function () { refreshUser(); });
+})();
+
+</script>
+</body>
+</html>
